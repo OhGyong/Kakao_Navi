@@ -46,7 +46,6 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
     KNGuidance_LocationGuideDelegate, KNGuidance_SafetyGuideDelegate,
     KNGuidance_RouteGuideDelegate, KNGuidance_VoiceGuideDelegate, KNGuidance_CitsGuideDelegate {
     private lateinit var binding: ActivityNavigationBinding
-//    private lateinit var apiService: ApiService
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,7 +57,7 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
             initializeWithAppKey(
                 com.vcudemo.BuildConfig.KAKAO_NAVIGATION_KEY,
                 BuildConfig.VERSION_NAME,
-                "964501",
+                com.vcudemo.BuildConfig.USER_KEY,
                 KNLanguageType.KNLanguageType_KOREAN,
                 aCompletion = {
                     if (it != null) {

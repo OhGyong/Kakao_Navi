@@ -19,8 +19,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val key: String = gradleLocalProperties(rootDir).getProperty("KAKAO_NAVIGATION_KEY") ?: ""
-        buildConfigField("String", "KAKAO_NAVIGATION_KEY", key)
+        fun key(pKey:String): String = gradleLocalProperties(rootDir).getProperty(pKey) ?: ""
+        buildConfigField("String", "KAKAO_NAVIGATION_KEY", key("KAKAO_NAVIGATION_KEY"))
+        buildConfigField("String", "USER_KEY", key("USER_KEY"))
     }
 
     buildTypes {
