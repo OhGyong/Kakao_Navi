@@ -69,7 +69,7 @@ class NavigationActivity :
             // 콘텍스트 등록 및 DB, 파일 등의 저장 경로 설정
             install(application, "$filesDir/files")
             initializeWithAppKey(
-                com.vcudemo.BuildConfig.KAKAO_NAVIGATION_KEY,
+                com.vcudemo.BuildConfig.KAKAO_NATIVE_APP_KEY,
                 BuildConfig.VERSION_NAME,
                 com.vcudemo.BuildConfig.USER_KEY,
                 KNLanguageType.KNLanguageType_KOREAN,

@@ -21,7 +21,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         fun key(pKey:String): String = gradleLocalProperties(rootDir).getProperty(pKey) ?: ""
-        buildConfigField("String", "KAKAO_NAVIGATION_KEY", key("KAKAO_NAVIGATION_KEY"))
+        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", key("KAKAO_NATIVE_APP_KEY"))
         buildConfigField("String", "SK_APP_KEY", key("SK_APP_KEY"))
         buildConfigField("String", "USER_KEY", key("USER_KEY"))
         buildConfigField("String", "BASE_URL", key("BASE_URL"))
@@ -62,6 +62,9 @@ dependencies {
 
     // kakao navi
     implementation("com.kakaomobility.knsdk:knsdk_ui:1.6.6")
+
+    // kakao map
+    implementation ("com.kakao.maps.open:android:2.5.0")
 
     // Hilt
     implementation ("com.google.dagger:hilt-android:$hiltVersion")

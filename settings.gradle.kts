@@ -11,7 +11,10 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven {
-            url  = uri("https://devrepo.kakaomobility.com/repository/kakao-mobility-android-knsdk-public/")
+            url = uri("https://devrepo.kakaomobility.com/repository/kakao-mobility-android-knsdk-public/")
+        }
+        maven {
+            url = uri("https://devrepo.kakao.com/nexus/repository/kakaomap-releases/")
         }
     }
 }
