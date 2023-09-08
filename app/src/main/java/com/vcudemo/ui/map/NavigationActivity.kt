@@ -1,10 +1,8 @@
 package com.vcudemo.ui.map
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Base64
 import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
 import com.kakaomobility.knsdk.KNCarFuel
@@ -39,8 +37,6 @@ import com.kakaomobility.location.library.BuildConfig
 import com.vcudemo.R
 import com.vcudemo.base.BaseActivity
 import com.vcudemo.databinding.ActivityNavigationBinding
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 
 class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
     KNGuidance_LocationGuideDelegate, KNGuidance_SafetyGuideDelegate,
@@ -60,29 +56,18 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
                 com.vcudemo.BuildConfig.USER_KEY,
                 KNLanguageType.KNLanguageType_KOREAN,
                 aCompletion = {
+                    binding = DataBindingUtil.setContentView(this@NavigationActivity, R.layout.activity_navigation)
                     if (it != null) {
                         when (it.code) {
                             KNError_Code_C302 -> {
                                 requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
                             }
                             else -> {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                                    val packageInfo = applicationContext.packageManager.getPackageInfo(applicationContext.packageName, PackageManager.GET_SIGNING_CERTIFICATES)
-                                    for (signature in packageInfo.signingInfo.apkContentsSigners) {
-                                        try {
-                                            val md = MessageDigest.getInstance("SHA")
-                                            md.update(signature.toByteArray())
-                                            println("key hash: ${Base64.encodeToString(md.digest(), Base64.NO_WRAP)}")
 
-                                        } catch (e: NoSuchAlgorithmException) {
-                                        }
-                                    }
-                                }
                             }
                         }
                     } else {
-                        println("인증 완료")
-                        binding = DataBindingUtil.setContentView(this@NavigationActivity, R.layout.activity_navigation)
+                        // todo : tag 달기
                         setNavSetting()
                     }
                 })
