@@ -5,8 +5,8 @@ import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.kakaomobility.knsdk.KNCarType
 import com.kakaomobility.knsdk.KNLanguageType
 import com.kakaomobility.knsdk.KNRouteAvoidOption
@@ -37,6 +37,8 @@ import com.vcudemo.R
 import com.vcudemo.base.BaseActivity
 import com.vcudemo.databinding.ActivityNavigationBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
@@ -60,15 +62,16 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
                 aCompletion = {
                     binding = DataBindingUtil.setContentView(this@NavigationActivity, R.layout.activity_navigation)
                     viewModel = ViewModelProvider(this@NavigationActivity)[NavigationViewModel::class.java]
+                    observeFlow()
 
-                    observeLiveData()
                     if (it != null) {
                         when (it.code) {
                             KNError_Code_C302 -> {
                                 requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
                             }
                             else -> {
-
+                                // todo : 추가 에러 작성
+                                println("내비 초기화 에러")
                             }
                         }
                     } else {
@@ -80,10 +83,12 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
         }
     }
 
-    private fun observeLiveData() {
-        viewModel.distanceData.observe(this, Observer {
-            println(it)
-        })
+    private fun observeFlow() {
+        lifecycleScope.launch {
+            viewModel.distanceData.collectLatest {
+                println(it)
+            }
+        }
     }
 
     /**
