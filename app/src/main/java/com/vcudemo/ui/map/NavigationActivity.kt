@@ -5,9 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
-import com.kakaomobility.knsdk.KNCarFuel
 import com.kakaomobility.knsdk.KNCarType
-import com.kakaomobility.knsdk.KNCarUsage
 import com.kakaomobility.knsdk.KNLanguageType
 import com.kakaomobility.knsdk.KNRouteAvoidOption
 import com.kakaomobility.knsdk.KNRoutePriority
@@ -29,7 +27,6 @@ import com.kakaomobility.knsdk.guidance.knguidance.routeguide.objects.KNMultiRou
 import com.kakaomobility.knsdk.guidance.knguidance.safetyguide.KNGuide_Safety
 import com.kakaomobility.knsdk.guidance.knguidance.safetyguide.objects.KNSafety
 import com.kakaomobility.knsdk.guidance.knguidance.voiceguide.KNGuide_Voice
-import com.kakaomobility.knsdk.trip.knrouteconfiguration.KNRouteConfiguration
 import com.kakaomobility.knsdk.trip.kntrip.KNTrip
 import com.kakaomobility.knsdk.trip.kntrip.knroute.KNRoute
 import com.kakaomobility.knsdk.ui.component.MapViewCameraMode
@@ -68,15 +65,25 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
                         }
                     } else {
                         // todo : tag 달기
-                        setNavSetting()
+                        settingMap()
+                        setNaviRoute()
                     }
                 })
         }
     }
-    private fun setNavSetting() {
-        binding.naviView.mapViewMode = MapViewCameraMode.Top
-        binding.naviView.carType = KNCarType.KNCarType_1
 
+    /**
+     * 지도 설정
+     */
+    private fun settingMap() {
+        binding.naviView.mapViewMode = MapViewCameraMode.Top // 2D 모드
+        binding.naviView.carType = KNCarType.KNCarType_Bike // 자동차: KNCarType_1, 오토바이: KNCarType_Bike
+    }
+
+    /**
+     * Navi 경로 설정
+     */
+    private fun setNaviRoute() {
         // 출발지 설정, 회사
         // 37.4669433,126.8867386
         // 541116, 301718
@@ -93,26 +100,13 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
                 println("KNError $knError")
             }
 
-            val routeConfig = KNRouteConfiguration(
-                KNCarType.KNCarType_Bike,    // 차량의 종류
-                KNCarFuel.KNCarFuel_Gasoline,    // 차량의 용도
-                false,      // 하이패스 장착 여부
-                KNCarUsage.KNCarUsage_Default,      // 유고 정보 반영 여부
-                -1,          // 차량의 전폭
-                -1,    // 차량의 전고
-                -1,   // 차량의 전장
-                -1,// 차량의 중량
-            )
-
-            // 경로 옵션 설정
             // 경로 옵션 설정
             val curRoutePriority = KNRoutePriority.valueOf(KNRoutePriority.KNRoutePriority_Recommand.toString())   // 경로 안내에서 우선적 고려 항목
             val curAvoidOptions = KNRouteAvoidOption.KNRouteAvoidOption_None.value
 
             knTrip?.routeWithPriority(curRoutePriority, curAvoidOptions) { error, _ ->
                 if (error != null) {
-                    println("경로 요청 실패")
-                    println(error)
+                    println("경로 요청 실패 $error")
                     // 경로 요청 실패
                 } else {
                     // 경로 요청 성공
