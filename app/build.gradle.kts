@@ -4,6 +4,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -47,6 +48,9 @@ android {
     }
 }
 
+val hiltVersion = 2.44
+
+
 dependencies {
 
     implementation("androidx.core:core-ktx:1.10.1")
@@ -56,6 +60,10 @@ dependencies {
 
     // kakao navi
     implementation("com.kakaomobility.knsdk:knsdk_ui:1.6.6")
+
+    // Hilt
+    implementation ("com.google.dagger:hilt-android:$hiltVersion")
+    kapt ("com.google.dagger:hilt-android-compiler:$hiltVersion")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
