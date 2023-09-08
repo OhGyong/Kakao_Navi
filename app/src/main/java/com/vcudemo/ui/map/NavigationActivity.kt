@@ -3,6 +3,7 @@ package com.vcudemo.ui.map
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -41,9 +42,14 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
+class NavigationActivity :
+    BaseActivity(), KNGuidance_GuideStateDelegate,
     KNGuidance_LocationGuideDelegate, KNGuidance_SafetyGuideDelegate,
     KNGuidance_RouteGuideDelegate, KNGuidance_VoiceGuideDelegate, KNGuidance_CitsGuideDelegate {
+    companion object {
+        const val TAG = "NavigationActivity"
+    }
+
     private lateinit var binding: ActivityNavigationBinding
     private lateinit var viewModel: NavigationViewModel
 
@@ -71,11 +77,11 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
                             }
                             else -> {
                                 // todo : 추가 에러 작성
-                                println("내비 초기화 에러")
+                                Log.d(TAG, "내비 초기화 실패")
                             }
                         }
                     } else {
-                        // todo : tag 달기
+                        Log.d(TAG, "내비 초기화 성공")
                         settingMap()
                         setNaviRoute()
                     }
@@ -86,7 +92,8 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
     private fun observeFlow() {
         lifecycleScope.launch {
             viewModel.distanceData.collectLatest {
-                println(it)
+                // todo : 실패 case 작성
+                Log.d(TAG, "SK 직선 거리 : ${it.success?.distance}")
             }
         }
     }
@@ -124,12 +131,14 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
             val curAvoidOptions = KNRouteAvoidOption.KNRouteAvoidOption_None.value
 
             knTrip?.routeWithPriority(curRoutePriority, curAvoidOptions) { error, _ ->
+                // 경로 요청 실패
                 if (error != null) {
+                    Log.d(TAG, "경로 요청 실패 : $error")
                     println("경로 요청 실패 $error")
-                    // 경로 요청 실패
-                } else {
-                    // 경로 요청 성공
-                    println("경로 요청 성공")
+                }
+                // 경로 요청 성공
+                else {
+                    Log.d(TAG, "경로 요청 성공")
                     KNSDK.sharedGuidance()?.apply {
                         // 각 가이던스 델리게이트 등록
                         guideStateDelegate = this@NavigationActivity
@@ -151,17 +160,21 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
         })
     }
 
-    // 경로 안내 정보 업데이트 시 호출. `routeGuide`의 항목이 1개 이상 변경 시 전달됨.
+    /**
+     * 경로 안내 정보 업데이트 시 호출
+     * `routeGuide`의 항목이 1개 이상 변경 시 전달됨.
+     */
     override fun guidanceDidUpdateRouteGuide(aGuidance: KNGuidance, aRouteGuide: KNGuide_Route) {
         binding.naviView.guidanceDidUpdateRouteGuide(aGuidance, aRouteGuide)
 
         if(aRouteGuide.curDirection?.location?.pos != null && aRouteGuide.nextDirection?.location?.pos != null) {
-            // todo : 거리 계산 api 호출 및 ble 반환
+            /**
+             * SK 직선 거리 API 호출
+             */
             viewModel.getDistanceData(
                 aRouteGuide.curDirection?.location?.pos!!,
                 aRouteGuide.nextDirection?.location?.pos!!
             )
-
         }
     }
 
