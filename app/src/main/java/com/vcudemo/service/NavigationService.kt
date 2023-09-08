@@ -1,5 +1,6 @@
 package com.vcudemo.service
 
+import com.vcudemo.data.navigation.CoordConvertResponse
 import com.vcudemo.data.navigation.DistanceResponse
 import retrofit2.Call
 import retrofit2.http.GET
@@ -21,4 +22,17 @@ interface NavigationService {
         @Query("endY") endY: String,
         @Query("reqCoordType") reqCoordType: String
     ) : Call<DistanceResponse>
+
+    /**
+     * SK 좌표 변환
+     */
+    @GET("geo/coordconvert")
+    fun coordConvertRequest(
+        @Header("appKey") appKey: String,
+        @Query("version") version: String,
+        @Query("lat") lat: String,
+        @Query("lon") lon: String,
+        @Query("fromCoord") fromCoord: String,
+        @Query("toCoord") toCoord: String,
+    ) : Call<CoordConvertResponse>
 }

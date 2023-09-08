@@ -1,6 +1,8 @@
 package com.vcudemo.ui.map
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -8,6 +10,8 @@ import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.kakaomobility.knsdk.KNCarType
 import com.kakaomobility.knsdk.KNLanguageType
 import com.kakaomobility.knsdk.KNRouteAvoidOption
@@ -52,6 +56,10 @@ class NavigationActivity :
 
     private lateinit var binding: ActivityNavigationBinding
     private lateinit var viewModel: NavigationViewModel
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private var myLatitude = 0.0
+    private var myLongitude = 0.0
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,8 +90,9 @@ class NavigationActivity :
                         }
                     } else {
                         Log.d(TAG, "내비 초기화 성공")
+                        getMyLocation()
                         settingMap()
-                        setNaviRoute()
+
                     }
                 })
         }
@@ -91,11 +100,86 @@ class NavigationActivity :
 
     private fun observeFlow() {
         lifecycleScope.launch {
+            viewModel.coordConvertData.collectLatest {
+                // todo : 실패 case 작성
+                Log.d(TAG, "내 위치 정보 : ${it.success}")
+                if(it.success == null) return@collectLatest
+
+                val katechX = it.success.lon.split(".")[0].toInt()
+                val katechY = it.success.lat.split(".")[0].toInt()
+
+                // 출발지 설정, 현재 위치
+                val start = KNPOI("독산역 1호선", katechX, katechY, null)
+
+                // 목적지 설정, 가산디지털단지역
+                val goal = KNPOI("가산디지털단지역 1호선", 301335, 542820, null)
+
+                // 경로 생성
+                KNSDK.makeTripWithStart(start, goal, null, null, aCompletion = { knError: KNError?, knTrip: KNTrip? ->
+                    if (knError != null) {
+                        println("KNError $knError")
+                    }
+
+                    // 경로 옵션 설정
+                    val curRoutePriority = KNRoutePriority.valueOf(KNRoutePriority.KNRoutePriority_Recommand.toString())   // 경로 안내에서 우선적 고려 항목
+                    val curAvoidOptions = KNRouteAvoidOption.KNRouteAvoidOption_None.value
+
+                    knTrip?.routeWithPriority(curRoutePriority, curAvoidOptions) { error, _ ->
+                        // 경로 요청 실패
+                        if (error != null) {
+                            Log.d(TAG, "경로 요청 실패 : $error")
+                            println("경로 요청 실패 $error")
+                        }
+                        // 경로 요청 성공
+                        else {
+                            Log.d(TAG, "경로 요청 성공")
+                            KNSDK.sharedGuidance()?.apply {
+                                // 각 가이던스 델리게이트 등록
+                                guideStateDelegate = this@NavigationActivity
+                                locationGuideDelegate = this@NavigationActivity
+                                routeGuideDelegate = this@NavigationActivity
+                                safetyGuideDelegate = this@NavigationActivity
+                                voiceGuideDelegate = this@NavigationActivity
+                                citsGuideDelegate = this@NavigationActivity
+
+                                binding.naviView.initWithGuidance(
+                                    this,
+                                    knTrip,
+                                    curRoutePriority,
+                                    curAvoidOptions
+                                )
+                            }
+                        }
+                    }
+                })
+            }
+        }
+
+        lifecycleScope.launch {
             viewModel.distanceData.collectLatest {
                 // todo : 실패 case 작성
                 Log.d(TAG, "SK 직선 거리 : ${it.success?.distance}")
             }
         }
+    }
+
+    /**
+     * 현재 위치 게산
+     */
+    // todo : 출발지, 목적지 값은 map에서 되도록 수정할 필요 있음.
+    @SuppressLint("MissingPermission")
+    private fun getMyLocation() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location : Location? ->
+                Log.d(TAG, "내 위치: $location")
+                if(location?.latitude != null) {
+                    Log.d(TAG, "getMyLocation")
+                    myLatitude = location.latitude
+                    myLongitude = location.longitude
+                    viewModel.getCoordConvertData(myLatitude, myLongitude)
+                }
+            }
     }
 
     /**
@@ -113,51 +197,7 @@ class NavigationActivity :
         // 출발지 설정, 회사
         // 37.4669433,126.8867386
         // 541116, 301718
-        val start = KNPOI("독산역 1호선", 301718, 541116, null)
 
-        // 목적지 설정, 가산디지털단지역
-        // 37.4822545, 126.8821832
-        // 542820, 301335
-        val goal = KNPOI("가산디지털단지역 1호선", 301335, 542820, null)
-
-        // 경로 생성
-        KNSDK.makeTripWithStart(start, goal, null, null, aCompletion = { knError: KNError?, knTrip: KNTrip? ->
-            if (knError != null) {
-                println("KNError $knError")
-            }
-
-            // 경로 옵션 설정
-            val curRoutePriority = KNRoutePriority.valueOf(KNRoutePriority.KNRoutePriority_Recommand.toString())   // 경로 안내에서 우선적 고려 항목
-            val curAvoidOptions = KNRouteAvoidOption.KNRouteAvoidOption_None.value
-
-            knTrip?.routeWithPriority(curRoutePriority, curAvoidOptions) { error, _ ->
-                // 경로 요청 실패
-                if (error != null) {
-                    Log.d(TAG, "경로 요청 실패 : $error")
-                    println("경로 요청 실패 $error")
-                }
-                // 경로 요청 성공
-                else {
-                    Log.d(TAG, "경로 요청 성공")
-                    KNSDK.sharedGuidance()?.apply {
-                        // 각 가이던스 델리게이트 등록
-                        guideStateDelegate = this@NavigationActivity
-                        locationGuideDelegate = this@NavigationActivity
-                        routeGuideDelegate = this@NavigationActivity
-                        safetyGuideDelegate = this@NavigationActivity
-                        voiceGuideDelegate = this@NavigationActivity
-                        citsGuideDelegate = this@NavigationActivity
-
-                        binding.naviView.initWithGuidance(
-                            this,
-                            knTrip,
-                            curRoutePriority,
-                            curAvoidOptions
-                        )
-                    }
-                }
-            }
-        })
     }
 
     /**
