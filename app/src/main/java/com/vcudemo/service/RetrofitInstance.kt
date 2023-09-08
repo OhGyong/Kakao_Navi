@@ -18,5 +18,5 @@ object RetrofitInstance {
 
     @Singleton
     @Provides
-    fun getDistanceService(): DistanceService = retrofit.create(DistanceService::class.java)
+    fun getDistanceService(): NavigationService = retrofit.create(NavigationService::class.java)
 }

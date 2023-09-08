@@ -6,7 +6,11 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Query
 
-interface DistanceService {
+interface NavigationService {
+
+    /**
+     * SK 직선 거리 계산
+     */
     @GET("routes/distance")
     fun distanceRequest(
         @Header("appKey") appKey: String,
