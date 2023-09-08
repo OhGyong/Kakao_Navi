@@ -7,10 +7,13 @@ import androidx.lifecycle.viewModelScope
 import com.kakaomobility.knsdk.common.util.FloatPoint
 import com.vcudemo.data.navigation.DistanceResult
 import com.vcudemo.repository.NavigationRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class NavigationViewModel: ViewModel() {
+@HiltViewModel
+class NavigationViewModel @Inject constructor(private val navigationRepository: NavigationRepository) : ViewModel() {
     private val _distanceData: MutableLiveData<DistanceResult> = MutableLiveData()
     val distanceData: LiveData<DistanceResult> = _distanceData
 
@@ -18,7 +21,7 @@ class NavigationViewModel: ViewModel() {
         viewModelScope.launch(Dispatchers.Default) {
             try{
                 _distanceData.postValue(
-                    DistanceResult(success = NavigationRepository().getDistanceData(curDirection, nextDirection)?.distanceInfo)
+                    DistanceResult(success = navigationRepository.getDistanceData(curDirection, nextDirection)?.distanceInfo)
                 )
             } catch (e: Exception) {
                 _distanceData.postValue(

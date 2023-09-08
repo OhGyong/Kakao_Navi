@@ -18,9 +18,3 @@ interface DistanceService {
         @Query("reqCoordType") reqCoordType: String
     ) : Call<DistanceResponse>
 }
-
-object DistanceApi {
-    val distanceService: DistanceService by lazy {
-        BaseService.retrofit.create(DistanceService::class.java)
-    }
-}

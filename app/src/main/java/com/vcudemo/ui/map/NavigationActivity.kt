@@ -36,7 +36,9 @@ import com.kakaomobility.location.library.BuildConfig
 import com.vcudemo.R
 import com.vcudemo.base.BaseActivity
 import com.vcudemo.databinding.ActivityNavigationBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
     KNGuidance_LocationGuideDelegate, KNGuidance_SafetyGuideDelegate,
     KNGuidance_RouteGuideDelegate, KNGuidance_VoiceGuideDelegate, KNGuidance_CitsGuideDelegate {
