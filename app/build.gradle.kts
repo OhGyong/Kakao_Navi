@@ -3,8 +3,8 @@ import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
     id("dagger.hilt.android.plugin")
+    id("kotlin-kapt")
 }
 
 android {
@@ -22,7 +22,9 @@ android {
 
         fun key(pKey:String): String = gradleLocalProperties(rootDir).getProperty(pKey) ?: ""
         buildConfigField("String", "KAKAO_NAVIGATION_KEY", key("KAKAO_NAVIGATION_KEY"))
+        buildConfigField("String", "SK_APP_KEY", key("SK_APP_KEY"))
         buildConfigField("String", "USER_KEY", key("USER_KEY"))
+        buildConfigField("String", "BASE_URL", key("BASE_URL"))
     }
 
     buildTypes {
@@ -64,6 +66,9 @@ dependencies {
     // Hilt
     implementation ("com.google.dagger:hilt-android:$hiltVersion")
     kapt ("com.google.dagger:hilt-android-compiler:$hiltVersion")
+
+    // ViewModel
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

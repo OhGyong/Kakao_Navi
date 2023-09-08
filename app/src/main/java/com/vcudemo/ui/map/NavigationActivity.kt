@@ -5,6 +5,8 @@ import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.kakaomobility.knsdk.KNCarType
 import com.kakaomobility.knsdk.KNLanguageType
 import com.kakaomobility.knsdk.KNRouteAvoidOption
@@ -39,6 +41,7 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
     KNGuidance_LocationGuideDelegate, KNGuidance_SafetyGuideDelegate,
     KNGuidance_RouteGuideDelegate, KNGuidance_VoiceGuideDelegate, KNGuidance_CitsGuideDelegate {
     private lateinit var binding: ActivityNavigationBinding
+    private lateinit var viewModel: NavigationViewModel
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +57,9 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
                 KNLanguageType.KNLanguageType_KOREAN,
                 aCompletion = {
                     binding = DataBindingUtil.setContentView(this@NavigationActivity, R.layout.activity_navigation)
+                    viewModel = ViewModelProvider(this@NavigationActivity)[NavigationViewModel::class.java]
+
+                    observeLiveData()
                     if (it != null) {
                         when (it.code) {
                             KNError_Code_C302 -> {
@@ -70,6 +76,12 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
                     }
                 })
         }
+    }
+
+    private fun observeLiveData() {
+        viewModel.distanceData.observe(this, Observer {
+            println(it)
+        })
     }
 
     /**
@@ -138,6 +150,11 @@ class NavigationActivity : BaseActivity(), KNGuidance_GuideStateDelegate,
 
         if(aRouteGuide.curDirection?.location?.pos != null && aRouteGuide.nextDirection?.location?.pos != null) {
             // todo : 거리 계산 api 호출 및 ble 반환
+            viewModel.getDistanceData(
+                aRouteGuide.curDirection?.location?.pos!!,
+                aRouteGuide.nextDirection?.location?.pos!!
+            )
+
         }
     }
 
