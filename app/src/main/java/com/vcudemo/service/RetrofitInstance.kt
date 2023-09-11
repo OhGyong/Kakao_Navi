@@ -11,12 +11,21 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 object RetrofitInstance {
-    private val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(com.vcudemo.BuildConfig.BASE_URL)
+    private val sKRetrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(com.vcudemo.BuildConfig.SK_BASE_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    private val kakaoRetrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(com.vcudemo.BuildConfig.KAKAO_BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
     @Singleton
     @Provides
-    fun navigationService(): NavigationService = retrofit.create(NavigationService::class.java)
+    fun navigationService(): NavigationService = sKRetrofit.create(NavigationService::class.java)
+
+    @Singleton
+    @Provides
+    fun mapService(): MapService = kakaoRetrofit.create(MapService::class.java)
 }

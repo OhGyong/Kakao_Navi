@@ -5,6 +5,8 @@ import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
@@ -16,13 +18,18 @@ import com.naver.maps.map.overlay.Marker
 import com.vcudemo.R
 import com.vcudemo.base.BaseActivity
 import com.vcudemo.databinding.ActivityMapBinding
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MapActivity: BaseActivity(), OnMapReadyCallback {
     companion object {
         const val TAG = "MapActivity"
     }
 
     private lateinit var binding: ActivityMapBinding
+    private lateinit var viewModel: MapViewModel
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private var myLatitude = 0.0
@@ -31,11 +38,17 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_map)
+        viewModel = ViewModelProvider(this@MapActivity)[MapViewModel::class.java]
 
         NaverMapSdk.getInstance(this).client =
             NaverMapSdk.NaverCloudPlatformClient(com.vcudemo.BuildConfig.NAVER_CLIENT_ID)
 
+        observeFlow()
         getMyLocation()
+
+        binding.btnSearch.setOnClickListener {
+            viewModel.getSearchPlaceData(myLatitude.toString(), myLongitude.toString())
+        }
     }
 
     override fun onMapReady(naverMap: NaverMap) {
@@ -51,6 +64,14 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
         marker.width = 40
         marker.height = 70
         marker.map = naverMap
+    }
+
+    private fun observeFlow() {
+        lifecycleScope.launch {
+            viewModel.searchPlaceData.collectLatest {
+                Log.d(TAG, "observeFlow $it")
+            }
+        }
     }
 
     @SuppressLint("MissingPermission")

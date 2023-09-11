@@ -22,9 +22,11 @@ android {
 
         fun key(pKey:String): String = gradleLocalProperties(rootDir).getProperty(pKey) ?: ""
         buildConfigField("String", "KAKAO_NATIVE_APP_KEY", key("KAKAO_NATIVE_APP_KEY_CONF"))
+        buildConfigField("String", "KAKAO_REST_API_KEY", key("KAKAO_REST_API_KEY"))
         buildConfigField("String", "SK_APP_KEY", key("SK_APP_KEY"))
         buildConfigField("String", "USER_KEY", key("USER_KEY"))
-        buildConfigField("String", "BASE_URL", key("BASE_URL"))
+        buildConfigField("String", "SK_BASE_URL", key("SK_BASE_URL"))
+        buildConfigField("String", "KAKAO_BASE_URL", key("KAKAO_BASE_URL"))
         buildConfigField("String", "NAVER_CLIENT_ID", key("NAVER_CLIENT_ID"))
 
         manifestPlaceholders["NAVER_CLIENT_ID"] = key("NAVER_CLIENT_ID")
