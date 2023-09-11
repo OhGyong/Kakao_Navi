@@ -30,7 +30,7 @@
         <activity android:name=".ui.map.NavigationActivity"/>
 
         <meta-data
-            android:name="com.kakao.vectormap.APP_KEY"
-            android:value="${KAKAO_NATIVE_APP_KEY}"/>
+            android:name="com.naver.maps.map.CLIENT_ID"
+            android:value="${NAVER_CLIENT_ID}"/>
     </application>
 </manifest>

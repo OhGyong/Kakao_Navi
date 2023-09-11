@@ -25,8 +25,9 @@ android {
         buildConfigField("String", "SK_APP_KEY", key("SK_APP_KEY"))
         buildConfigField("String", "USER_KEY", key("USER_KEY"))
         buildConfigField("String", "BASE_URL", key("BASE_URL"))
+        buildConfigField("String", "NAVER_CLIENT_ID", key("NAVER_CLIENT_ID"))
 
-        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = key("KAKAO_NATIVE_APP_KEY_MANI")
+        manifestPlaceholders["NAVER_CLIENT_ID"] = key("NAVER_CLIENT_ID")
     }
 
     buildTypes {
@@ -65,8 +66,8 @@ dependencies {
     // kakao navi
     implementation("com.kakaomobility.knsdk:knsdk_ui:1.6.6")
 
-    // kakao map
-    implementation ("com.kakao.maps.open:android:2.5.0")
+    // Naver Map
+    implementation("com.naver.maps:map-sdk:3.17.0")
 
     // Hilt
     implementation ("com.google.dagger:hilt-android:$hiltVersion")
