@@ -22,12 +22,15 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".base.BaseActivity"/>
         <activity android:name=".ui.map.MapActivity"/>
         <activity android:name=".ui.map.NavigationActivity"/>
+
+        <meta-data
+            android:name="com.kakao.vectormap.APP_KEY"
+            android:value="${KAKAO_NATIVE_APP_KEY}"/>
     </application>
 </manifest>

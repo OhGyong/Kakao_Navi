@@ -21,10 +21,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         fun key(pKey:String): String = gradleLocalProperties(rootDir).getProperty(pKey) ?: ""
-        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", key("KAKAO_NATIVE_APP_KEY"))
+        buildConfigField("String", "KAKAO_NATIVE_APP_KEY", key("KAKAO_NATIVE_APP_KEY_CONF"))
         buildConfigField("String", "SK_APP_KEY", key("SK_APP_KEY"))
         buildConfigField("String", "USER_KEY", key("USER_KEY"))
         buildConfigField("String", "BASE_URL", key("BASE_URL"))
+
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = key("KAKAO_NATIVE_APP_KEY_MANI")
     }
 
     buildTypes {
