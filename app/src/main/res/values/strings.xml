@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">VcuDemo</string>
+    <string name="search_hint">검색</string>
 </resources>
