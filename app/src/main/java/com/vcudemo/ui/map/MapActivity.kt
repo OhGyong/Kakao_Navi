@@ -6,10 +6,7 @@ import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
@@ -23,8 +20,6 @@ import com.vcudemo.R
 import com.vcudemo.base.BaseActivity
 import com.vcudemo.databinding.ActivityMapBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MapActivity: BaseActivity(), OnMapReadyCallback {
@@ -34,7 +29,6 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     }
 
     private lateinit var binding: ActivityMapBinding
-    private lateinit var viewModel: MapViewModel
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationSource: FusedLocationSource
 
@@ -44,19 +38,13 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_map)
-        viewModel = ViewModelProvider(this@MapActivity)[MapViewModel::class.java]
         locationSource =
             FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
         NaverMapSdk.getInstance(this).client =
             NaverMapSdk.NaverCloudPlatformClient(com.vcudemo.BuildConfig.NAVER_CLIENT_ID)
 
-        observeFlow()
         getMyLocation()
-
-        binding.btnSearch.setOnClickListener {
-            viewModel.getSearchPlaceData(myLatitude.toString(), myLongitude.toString())
-        }
 
         binding.etSearch.setOnClickListener {
             val intent = Intent(this, SearchActivity::class.java)
@@ -81,14 +69,6 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
         naverMap.cameraPosition = cameraPosition
     }
 
-    private fun observeFlow() {
-        lifecycleScope.launch {
-            viewModel.searchPlaceData.collectLatest {
-                Log.d(TAG, "observeFlow $it")
-            }
-        }
-    }
-
     @SuppressLint("MissingPermission")
     private fun getMyLocation() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -107,7 +87,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
 
     private val getSearchResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if(result.resultCode == AppCompatActivity.RESULT_OK) {
+            if(result.resultCode == RESULT_OK) {
                 println("ok")
             }else {
                 println("?")
