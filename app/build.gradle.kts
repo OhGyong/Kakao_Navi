@@ -71,6 +71,9 @@ dependencies {
     // Naver Map
     implementation("com.naver.maps:map-sdk:3.17.0")
 
+    // 위치 정보
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
     // Hilt
     implementation ("com.google.dagger:hilt-android:$hiltVersion")
     kapt ("com.google.dagger:hilt-android-compiler:$hiltVersion")
