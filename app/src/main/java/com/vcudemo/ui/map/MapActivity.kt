@@ -63,6 +63,9 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
         naverMap.locationSource = locationSource
         naverMap.locationTrackingMode = LocationTrackingMode.NoFollow
 
+        // 현재 위치 버튼 on
+        naverMap.uiSettings.isLocationButtonEnabled = true
+
         // 카메라 줌 레벨 및 카메라 이동
         val cameraPosition = CameraPosition(LatLng(myLatitude, myLongitude), 13.0)
         naverMap.cameraPosition = cameraPosition
