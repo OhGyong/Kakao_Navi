@@ -1,8 +1,10 @@
 package com.vcudemo.ui.map
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.databinding.DataBindingUtil
@@ -62,6 +64,16 @@ class SearchActivity: BaseActivity() {
             }
             handled
         }
+
+        adapter.setOnItemClickListener(object : ItemClickListener{
+            override fun onItemClickListener(v: View, data: Document, pos: Int) {
+                val intent = Intent()
+                intent.putExtra("latitude", data.y.toDouble())
+                intent.putExtra("longitude", data.x.toDouble())
+                setResult(RESULT_OK, intent)
+                finish()
+            }
+        })
     }
 
     private fun observeFlow() {

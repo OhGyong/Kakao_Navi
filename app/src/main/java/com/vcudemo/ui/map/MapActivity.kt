@@ -15,6 +15,7 @@ import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.NaverMapSdk
 import com.naver.maps.map.OnMapReadyCallback
+import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.util.FusedLocationSource
 import com.vcudemo.R
 import com.vcudemo.base.BaseActivity
@@ -31,9 +32,12 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityMapBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationSource: FusedLocationSource
+    private lateinit var naverMap: NaverMap
 
     private var myLatitude = 0.0
     private var myLongitude = 0.0
+    private var destinationLatitude = 0.0
+    private var destinationLongitude = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +60,8 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
 
     override fun onMapReady(naverMap: NaverMap) {
         Log.d(TAG, "onMapReady()")
+
+        this.naverMap = naverMap
 
         // 위치 추적 모드 on
         naverMap.locationSource = locationSource
@@ -88,7 +94,19 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     private val getSearchResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if(result.resultCode == RESULT_OK) {
-                println("ok")
+                if(result.data != null) {
+                    destinationLatitude = result.data!!.getDoubleExtra("latitude", 0.0)
+                    destinationLongitude = result.data!!.getDoubleExtra("longitude", 0.0)
+                }
+
+                val marker = Marker()
+                marker.position = LatLng(destinationLatitude, destinationLongitude)
+                marker.map = naverMap
+
+                // 카메라 줌 레벨 및 카메라 이동
+                val cameraPosition = CameraPosition(LatLng(destinationLatitude, destinationLongitude), 13.0)
+                naverMap.cameraPosition = cameraPosition
+
             }else {
                 println("?")
             }

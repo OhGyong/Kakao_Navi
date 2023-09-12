@@ -1,6 +1,7 @@
 package com.vcudemo.ui.map
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.vcudemo.data.map.SearchPlaceResponse.Document
@@ -8,13 +9,24 @@ import com.vcudemo.databinding.ItemSearchBinding
 
 class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
     private var itemList: ArrayList<Document> = ArrayList()
-    class ViewHolder(private val binding: ItemSearchBinding): RecyclerView.ViewHolder(binding.root) {
+    private var itemClickListener: ItemClickListener? = null
+
+    fun setOnItemClickListener(itemClickListener: ItemClickListener){
+        this.itemClickListener = itemClickListener
+    }
+    inner class ViewHolder(private val binding: ItemSearchBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(document: Document) {
             if(!document.distance.contains("km")) {
                 val count = document.distance.toLong()
                 document.distance = "${(count/ 1000)}.${(count % 1000 / 100)}km"
             }
             binding.searchItem = document
+
+            if(absoluteAdapterPosition != RecyclerView.NO_POSITION) {
+                itemView.setOnClickListener {
+                    itemClickListener?.onItemClickListener(itemView, document, absoluteAdapterPosition)
+                }
+            }
         }
     }
 
@@ -37,4 +49,8 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(itemList[position])
     }
+}
+
+interface ItemClickListener {
+    fun onItemClickListener(v: View, data: Document, pos: Int)
 }
