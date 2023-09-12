@@ -18,11 +18,11 @@ class SearchViewModel @Inject constructor(private val mapRepository: MapReposito
     )
     val searchPlaceData: StateFlow<SearchPlaceResult> = _searchPlaceData
 
-    fun getSearchPlaceData(x: String, y: String) {
+    fun getSearchPlaceData(query: String, x: String, y: String) {
         viewModelScope.launch(Dispatchers.Default) {
             try{
                 _searchPlaceData.value = SearchPlaceResult(
-                    success = mapRepository.getSearchPlaceData(x, y)
+                    success = mapRepository.getSearchPlaceData(query, x, y)
                 )
             } catch (e: Exception) {
                 _searchPlaceData.value = SearchPlaceResult(failure = e)

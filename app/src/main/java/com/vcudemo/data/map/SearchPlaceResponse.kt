@@ -31,6 +31,6 @@ data class SearchPlaceResponse(
         @SerializedName("x") val x: String,
         @SerializedName("y") val y: String,
         @SerializedName("place_url") val placeUrl: String,
-        @SerializedName("distance") val distance: String,
+        @SerializedName("distance") var distance: String,
     )
 }

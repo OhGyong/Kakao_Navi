@@ -1,13 +1,16 @@
 package com.vcudemo.ui.map
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.vcudemo.R
 import com.vcudemo.base.BaseActivity
+import com.vcudemo.data.map.SearchPlaceResponse.Document
 import com.vcudemo.databinding.ActivitySearchBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -21,10 +24,12 @@ class SearchActivity: BaseActivity() {
 
     private lateinit var binding: ActivitySearchBinding
     private lateinit var viewModel: SearchViewModel
+    private var adapter = SearchAdapter()
 
     private var myLatitude = ""
     private var myLongitude = ""
     private var searchText = ""
+    private var searchList = arrayListOf<Document>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +37,7 @@ class SearchActivity: BaseActivity() {
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_search)
         viewModel = ViewModelProvider(this)[SearchViewModel::class.java]
+        binding.rvSearch.adapter = adapter
 
         myLatitude = intent.getStringExtra("latitude").toString()
         myLongitude = intent.getStringExtra("longitude").toString()
@@ -39,6 +45,7 @@ class SearchActivity: BaseActivity() {
         observeFlow()
 
         binding.etSearch.setOnEditorActionListener { textView, action, _ ->
+            var handled = false
             if(action == EditorInfo.IME_ACTION_SEARCH) {
                 if(textView.text.isNullOrEmpty() || textView.text.isNullOrBlank()) {
                     return@setOnEditorActionListener false
@@ -46,16 +53,27 @@ class SearchActivity: BaseActivity() {
 
                 searchText = textView.text.toString()
 
-                viewModel.getSearchPlaceData(myLongitude, myLatitude)
+                viewModel.getSearchPlaceData(textView.text.toString() ,myLongitude, myLatitude)
+
+                // 키보드 닫기
+                val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                inputMethodManager.hideSoftInputFromWindow(binding.etSearch.windowToken, 0)
+                handled = true
             }
-            false
+            handled
         }
     }
 
     private fun observeFlow() {
         lifecycleScope.launch {
             viewModel.searchPlaceData.collectLatest {
+                // todo : 에러 핸들링
+
                 Log.d(TAG, "observeFlow $it")
+                if(it.success == null ) return@collectLatest
+
+                searchList = it.success.documents as ArrayList<Document>
+                adapter.setItem(searchList)
             }
         }
     }
