@@ -68,6 +68,9 @@ class SearchActivity: BaseActivity() {
         adapter.setOnItemClickListener(object : ItemClickListener{
             override fun onItemClickListener(v: View, data: Document, pos: Int) {
                 val intent = Intent()
+                intent.putExtra("placeName", data.placeName)
+                intent.putExtra("addressName", data.addressName)
+                intent.putExtra("distance", data.distance)
                 intent.putExtra("latitude", data.y.toDouble())
                 intent.putExtra("longitude", data.x.toDouble())
                 setResult(RESULT_OK, intent)

@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">VcuDemo</string>
     <string name="search_hint">검색</string>
+    <string name="find_road">길찾기</string>
 </resources>

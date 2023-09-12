@@ -5,6 +5,7 @@ import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -56,6 +57,19 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
             intent.putExtra("longitude", myLongitude.toString())
             getSearchResult.launch(intent)
         }
+
+        binding.ctDetail.setOnClickListener {
+        }
+
+        binding.btnIntentNavi.setOnClickListener {
+            val intent = Intent(this, NavigationActivity::class.java)
+            intent.putExtra("startLatitude", myLatitude.toString())
+            intent.putExtra("startLongitude", myLongitude.toString())
+            intent.putExtra("destinationLatitude", myLatitude.toString())
+            intent.putExtra("destinationLongitude", destinationLongitude.toString())
+            getSearchResult.launch(intent)
+        }
+
     }
 
     override fun onMapReady(naverMap: NaverMap) {
@@ -95,11 +109,18 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if(result.resultCode == RESULT_OK) {
                 if(result.data != null) {
+                    binding.etSearch.setText(result.data!!.getStringExtra("placeName"))
+                    binding.tvPlaceName.text = result.data!!.getStringExtra("placeName")
+                    binding.tvAddressName.text = result.data!!.getStringExtra("addressName")
+                    binding.tvDistance.text = result.data!!.getStringExtra("distance")
                     destinationLatitude = result.data!!.getDoubleExtra("latitude", 0.0)
                     destinationLongitude = result.data!!.getDoubleExtra("longitude", 0.0)
-                }
 
+                    binding.ctDetail.visibility = View.VISIBLE
+                }
                 val marker = Marker()
+                marker.width = 70
+                marker.height = 100
                 marker.position = LatLng(destinationLatitude, destinationLongitude)
                 marker.map = naverMap
 
