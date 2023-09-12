@@ -46,7 +46,7 @@ class SearchActivity: BaseActivity() {
 
                 searchText = textView.text.toString()
 
-                viewModel.getSearchPlaceData(myLatitude, myLongitude)
+                viewModel.getSearchPlaceData(myLongitude, myLatitude)
             }
             false
         }
