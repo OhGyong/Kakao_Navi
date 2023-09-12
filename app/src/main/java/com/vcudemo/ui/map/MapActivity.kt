@@ -1,9 +1,12 @@
 package com.vcudemo.ui.map
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -54,6 +57,13 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
         binding.btnSearch.setOnClickListener {
             viewModel.getSearchPlaceData(myLatitude.toString(), myLongitude.toString())
         }
+
+        binding.etSearch.setOnClickListener {
+            val intent = Intent(this, SearchActivity::class.java)
+            intent.putExtra("latitude", myLatitude.toString())
+            intent.putExtra("longitude", myLongitude.toString())
+            getSearchResult.launch(intent)
+        }
     }
 
     override fun onMapReady(naverMap: NaverMap) {
@@ -94,6 +104,15 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
                 }
             }
     }
+
+    private val getSearchResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if(result.resultCode == AppCompatActivity.RESULT_OK) {
+                println("ok")
+            }else {
+                println("?")
+            }
+        }
 
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>,
