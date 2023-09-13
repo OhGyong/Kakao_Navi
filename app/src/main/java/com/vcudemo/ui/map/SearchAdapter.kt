@@ -17,7 +17,8 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
     inner class ViewHolder(private val binding: ItemSearchBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(document: Document) {
             val distance = document.distance
-            if(distance.isNotEmpty() || distance.contains("km") || distance.contains('"')) {
+
+            if(distance.isNotEmpty() && !distance.contains("km") && distance.isNotBlank()) {
                 val count = distance.toLong()
                 document.distance = "${(count/ 1000)}.${(count % 1000 / 100)}km"
             }
