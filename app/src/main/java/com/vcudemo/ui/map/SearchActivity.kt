@@ -45,7 +45,10 @@ class SearchActivity: BaseActivity() {
         myLongitude = intent.getStringExtra("longitude").toString()
 
         observeFlow()
+        onClickListener()
+    }
 
+    private fun onClickListener() {
         binding.etSearch.setOnEditorActionListener { textView, action, _ ->
             var handled = false
             if(action == EditorInfo.IME_ACTION_SEARCH) {
@@ -55,6 +58,7 @@ class SearchActivity: BaseActivity() {
 
                 searchText = textView.text.toString()
 
+                // 카카오 장소 검색 API 호출
                 viewModel.getSearchPlaceData(textView.text.toString() ,myLongitude, myLatitude)
 
                 // 키보드 닫기
@@ -84,7 +88,7 @@ class SearchActivity: BaseActivity() {
             viewModel.searchPlaceData.collectLatest {
                 // todo : 에러 핸들링
 
-                Log.d(TAG, "observeFlow $it")
+                Log.d(TAG, "searchPlaceData: $it")
                 if(it.success == null ) return@collectLatest
 
                 searchList = it.success.documents as ArrayList<Document>

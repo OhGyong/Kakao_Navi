@@ -1,14 +1,11 @@
 package com.vcudemo.ui.map
 
 import android.Manifest
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.kakaomobility.knsdk.KNCarType
 import com.kakaomobility.knsdk.KNLanguageType
 import com.kakaomobility.knsdk.KNRouteAvoidOption
@@ -53,21 +50,23 @@ class NavigationActivity :
 
     private lateinit var binding: ActivityNavigationBinding
     private lateinit var viewModel: NavigationViewModel
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    // 출발지 좌표
     private var startLatitude = 0.0
     private var startLongitude = 0.0
+
+    // 도착지 좌표
     private var destinationLatitude = 0.0
     private var destinationLongitude = 0.0
+
+    // 회전 정보
     private var rgCode = ""
 
-    @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         KNSDK.apply {
-            // 콘텍스트 등록 및 DB, 파일 등의 저장 경로 설정
-            install(application, "$filesDir/files")
+            install(application, "$filesDir/files") // 콘텍스트 등록 및 DB, 파일 등의 저장 경로 설정
             initializeWithAppKey(
                 com.vcudemo.BuildConfig.KAKAO_NATIVE_APP_KEY,
                 BuildConfig.VERSION_NAME,
@@ -79,13 +78,13 @@ class NavigationActivity :
                     observeFlow()
 
                     if (it != null) {
+                        Log.d(TAG, "내비 초기화 실패: $it")
                         when (it.code) {
                             KNError_Code_C302 -> {
                                 requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
                             }
                             else -> {
                                 // todo : 추가 에러 작성
-                                Log.d(TAG, "내비 초기화 실패")
                             }
                         }
                     } else {
@@ -96,6 +95,7 @@ class NavigationActivity :
                         destinationLongitude = intent.getDoubleExtra("destinationLongitude", 0.0)
 
                         settingMap()
+
                         viewModel.getCoordConvertData(
                             startLatitude, startLongitude,
                             destinationLatitude, destinationLongitude
@@ -178,16 +178,6 @@ class NavigationActivity :
     private fun settingMap() {
         binding.naviView.mapViewMode = MapViewCameraMode.Top // 2D 모드
         binding.naviView.carType = KNCarType.KNCarType_Bike // 자동차: KNCarType_1, 오토바이: KNCarType_Bike
-    }
-
-    /**
-     * Navi 경로 설정
-     */
-    private fun setNaviRoute() {
-        // 출발지 설정, 회사
-        // 37.4669433,126.8867386
-        // 541116, 301718
-
     }
 
     /**
@@ -282,8 +272,6 @@ class NavigationActivity :
     ) {
         binding.naviView.guidanceDidUpdateSafetyGuide(aGuidance, aSafetyGuide)
     }
-
-
 
     override fun didFinishPlayVoiceGuide(aGuidance: KNGuidance, aVoiceGuide: KNGuide_Voice) {
         binding.naviView.didFinishPlayVoiceGuide(aGuidance, aVoiceGuide)

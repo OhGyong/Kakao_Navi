@@ -35,7 +35,6 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
     fun setItem(pItemList: ArrayList<Document>) {
         itemList = pItemList
         notifyItemRangeChanged(0, itemList.size)
-//        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

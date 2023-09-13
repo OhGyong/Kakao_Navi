@@ -83,6 +83,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
             }
 
             binding.mapView.getMapAsync(this)
+
             setMyLocationMarker()
             setMyLocationCamera()
         }
@@ -189,4 +190,34 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
                 // todo : 그냥 돌아왔을 때 처리하게 있나?
             }
         }
+
+    override fun onResume() {
+        super.onResume()
+        binding.mapView.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.mapView.onPause()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        binding.mapView.onSaveInstanceState(outState)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        binding.mapView.onStop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.mapView.onDestroy()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        binding.mapView.onLowMemory()
+    }
 }
