@@ -71,8 +71,8 @@ dependencies {
     // Naver Map
     implementation("com.naver.maps:map-sdk:3.17.0")
 
-    // 위치 정보
-    implementation("com.google.android.gms:play-services-location:21.0.1")
+    // 위치 정보, 등록을 하면 Navigation이랑 충돌이 나면서 크래시 발생
+//    implementation("com.google.android.gms:play-services-location:21.0.1")
 
     // Hilt
     implementation ("com.google.dagger:hilt-android:$hiltVersion")

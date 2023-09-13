@@ -12,12 +12,10 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
-import com.naver.maps.map.LocationTrackingMode
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.NaverMapSdk
 import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.Marker
-import com.naver.maps.map.util.FusedLocationSource
 import com.vcudemo.R
 import com.vcudemo.base.BaseActivity
 import com.vcudemo.databinding.ActivityMapBinding
@@ -32,7 +30,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
 
     private lateinit var binding: ActivityMapBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationSource: FusedLocationSource
+//    private lateinit var locationSource: FusedLocationSource
     private lateinit var naverMap: NaverMap
 
     private var myLatitude = 0.0
@@ -43,8 +41,8 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_map)
-        locationSource =
-            FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
+//        locationSource =
+//            FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
         NaverMapSdk.getInstance(this).client =
             NaverMapSdk.NaverCloudPlatformClient(com.vcudemo.BuildConfig.NAVER_CLIENT_ID)
@@ -63,11 +61,12 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
 
         binding.btnIntentNavi.setOnClickListener {
             val intent = Intent(this, NavigationActivity::class.java)
-            intent.putExtra("startLatitude", myLatitude.toString())
-            intent.putExtra("startLongitude", myLongitude.toString())
-            intent.putExtra("destinationLatitude", myLatitude.toString())
-            intent.putExtra("destinationLongitude", destinationLongitude.toString())
-            getSearchResult.launch(intent)
+            intent.putExtra("startLatitude", myLatitude)
+            intent.putExtra("startLongitude", myLongitude)
+            intent.putExtra("destinationLatitude", myLatitude)
+            intent.putExtra("destinationLongitude", destinationLongitude)
+            startActivity(intent)
+            finish()
         }
 
     }
@@ -78,8 +77,8 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
         this.naverMap = naverMap
 
         // 위치 추적 모드 on
-        naverMap.locationSource = locationSource
-        naverMap.locationTrackingMode = LocationTrackingMode.NoFollow
+//        naverMap.locationSource = locationSource
+//        naverMap.locationTrackingMode = LocationTrackingMode.NoFollow
 
         // 현재 위치 버튼 on
         naverMap.uiSettings.isLocationButtonEnabled = true
@@ -129,19 +128,19 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
                 naverMap.cameraPosition = cameraPosition
 
             }else {
-                println("?")
+                // todo : 그냥 돌아왔을 때 처리하게 있나?
             }
         }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>,
-                                            grantResults: IntArray) {
-        if (locationSource.onRequestPermissionsResult(requestCode, permissions,
-                grantResults)) {
-            if (!locationSource.isActivated) { // 권한 거부됨
-            }
-            return
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
+//    override fun onRequestPermissionsResult(requestCode: Int,
+//                                            permissions: Array<String>,
+//                                            grantResults: IntArray) {
+//        if (locationSource.onRequestPermissionsResult(requestCode, permissions,
+//                grantResults)) {
+//            if (!locationSource.isActivated) { // 권한 거부됨
+//            }
+//            return
+//        }
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//    }
 }

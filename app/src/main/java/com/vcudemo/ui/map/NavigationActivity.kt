@@ -1,8 +1,6 @@
 package com.vcudemo.ui.map
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -11,7 +9,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.kakaomobility.knsdk.KNCarType
 import com.kakaomobility.knsdk.KNLanguageType
 import com.kakaomobility.knsdk.KNRouteAvoidOption
@@ -58,8 +55,10 @@ class NavigationActivity :
     private lateinit var viewModel: NavigationViewModel
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    private var myLatitude = 0.0
-    private var myLongitude = 0.0
+    private var startLatitude = 0.0
+    private var startLongitude = 0.0
+    private var destinationLatitude = 0.0
+    private var destinationLongitude = 0.0
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,9 +89,16 @@ class NavigationActivity :
                         }
                     } else {
                         Log.d(TAG, "내비 초기화 성공")
-                        getMyLocation()
-                        settingMap()
+                        startLatitude = intent.getDoubleExtra("startLatitude", 0.0)
+                        startLongitude = intent.getDoubleExtra("startLongitude", 0.0)
+                        destinationLatitude = intent.getDoubleExtra("destinationLatitude", 0.0)
+                        destinationLongitude = intent.getDoubleExtra("destinationLongitude", 0.0)
 
+                        settingMap()
+                        viewModel.getCoordConvertData(
+                            startLatitude, startLongitude,
+                            destinationLatitude, destinationLongitude
+                        )
                     }
                 })
         }
@@ -100,24 +106,25 @@ class NavigationActivity :
 
     private fun observeFlow() {
         lifecycleScope.launch {
-            viewModel.coordConvertData.collectLatest {
-                // todo : 실패 case 작성
-                Log.d(TAG, "내 위치 정보 : ${it.success}")
+            viewModel.coordZipResult.collectLatest {
+                Log.d(TAG, "좌표 변환 결과: $it")
                 if(it.success == null) return@collectLatest
 
-                val katechX = it.success.lon.split(".")[0].toInt()
-                val katechY = it.success.lat.split(".")[0].toInt()
+                val katechStartX = it.success.startLongitude!!.split(".")[0].toInt()
+                val katechStartY = it.success.startLatitude!!.split(".")[0].toInt()
+                val katechDestinationX = it.success.destinationLongitude!!.split(".")[0].toInt()
+                val katechDestinationY = it.success.destinationLatitude!!.split(".")[0].toInt()
 
-                // 출발지 설정, 현재 위치
-                val start = KNPOI("독산역 1호선", katechX, katechY, null)
+                // 출발지 설정
+                val start = KNPOI("", katechStartX, katechStartY, null)
 
-                // 목적지 설정, 가산디지털단지역
-                val goal = KNPOI("가산디지털단지역 1호선", 301335, 542820, null)
+                // 목적지 설정
+                val destination = KNPOI("", katechDestinationX, katechDestinationY, null)
 
                 // 경로 생성
-                KNSDK.makeTripWithStart(start, goal, null, null, aCompletion = { knError: KNError?, knTrip: KNTrip? ->
+                KNSDK.makeTripWithStart(start, destination, null, null, aCompletion = { knError: KNError?, knTrip: KNTrip? ->
                     if (knError != null) {
-                        println("KNError $knError")
+                        Log.d(TAG, "경로 생성 에러(KNError: $knError")
                     }
 
                     // 경로 옵션 설정
@@ -128,7 +135,6 @@ class NavigationActivity :
                         // 경로 요청 실패
                         if (error != null) {
                             Log.d(TAG, "경로 요청 실패 : $error")
-                            println("경로 요청 실패 $error")
                         }
                         // 경로 요청 성공
                         else {
@@ -161,25 +167,6 @@ class NavigationActivity :
                 Log.d(TAG, "SK 직선 거리 : ${it.success?.distance}")
             }
         }
-    }
-
-    /**
-     * 현재 위치 게산
-     */
-    // todo : 출발지, 목적지 값은 map에서 되도록 수정할 필요 있음.
-    @SuppressLint("MissingPermission")
-    private fun getMyLocation() {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location : Location? ->
-                Log.d(TAG, "내 위치: $location")
-                if(location?.latitude != null) {
-                    Log.d(TAG, "getMyLocation")
-                    myLatitude = location.latitude
-                    myLongitude = location.longitude
-                    viewModel.getCoordConvertData(myLatitude, myLongitude)
-                }
-            }
     }
 
     /**
