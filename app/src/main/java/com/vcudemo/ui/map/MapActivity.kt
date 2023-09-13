@@ -85,7 +85,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
             binding.mapView.getMapAsync(this)
 
             setMyLocationMarker()
-            setMyLocationCamera()
+            setLocationCamera(myLatitude, myLongitude)
         }
 
         viewModel.updateMyLocationData.observe(this) {
@@ -101,7 +101,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
             }
 
             setMyLocationMarker()
-            setMyLocationCamera()
+            setLocationCamera(myLatitude, myLongitude)
         }
     }
 
@@ -151,10 +151,10 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 내 위치 카메라 설정
+     * 카메라 이동 설정
      */
-    private fun setMyLocationCamera() {
-        val cameraPosition = CameraPosition(LatLng(myLatitude, myLongitude), 13.0)
+    private fun setLocationCamera(latitude: Double, longitude: Double) {
+        val cameraPosition = CameraPosition(LatLng(latitude, longitude), 13.0)
         naverMap.cameraPosition = cameraPosition
     }
 
@@ -182,10 +182,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
                 marker.position = LatLng(endLatitude, endLongitude)
                 marker.map = naverMap
 
-                // 카메라 이동
-                val cameraPosition = CameraPosition(LatLng(endLatitude, endLongitude), 13.0)
-                naverMap.cameraPosition = cameraPosition
-
+                setLocationCamera(endLatitude, endLongitude)
             }else {
                 // todo : 그냥 돌아왔을 때 처리하게 있나?
             }
@@ -204,11 +201,6 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         binding.mapView.onSaveInstanceState(outState)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        binding.mapView.onStop()
     }
 
     override fun onDestroy() {
