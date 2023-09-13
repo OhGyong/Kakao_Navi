@@ -59,6 +59,7 @@ class NavigationActivity :
     private var startLongitude = 0.0
     private var destinationLatitude = 0.0
     private var destinationLongitude = 0.0
+    private var rgCode = ""
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -165,6 +166,8 @@ class NavigationActivity :
             viewModel.distanceData.collectLatest {
                 // todo : 실패 case 작성
                 Log.d(TAG, "SK 직선 거리 : ${it.success?.distance}")
+                if(it.success == null) return@collectLatest
+                binding.tvInform.text = "다음 경로: $rgCode ${it.success?.distance}m"
             }
         }
     }
@@ -195,6 +198,24 @@ class NavigationActivity :
         binding.naviView.guidanceDidUpdateRouteGuide(aGuidance, aRouteGuide)
 
         if(aRouteGuide.curDirection?.location?.pos != null && aRouteGuide.nextDirection?.location?.pos != null) {
+            rgCode = aRouteGuide.nextDirection?.rgCode.toString()
+            // todo : 모든 rgCode를 적용해야하나?
+            when(rgCode) {
+                "KNRGCode_Straight" -> {
+                    rgCode = "직진"
+                }
+                "KNRGCode_LeftTurn" -> {
+                    rgCode = "좌회전"
+                }
+                "KNRGCode_RightTurn" -> {
+                    rgCode = "우회전"
+                }
+                "KNRGCode_UTurn" -> {
+                    rgCode = "유턴"
+                }
+            }
+
+
             /**
              * SK 직선 거리 API 호출
              */
