@@ -1,13 +1,14 @@
 package com.vcudemo.ui.map
 
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.location.Location
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
@@ -16,6 +17,7 @@ import com.naver.maps.map.NaverMap
 import com.naver.maps.map.NaverMapSdk
 import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.util.MarkerIcons
 import com.vcudemo.R
 import com.vcudemo.base.BaseActivity
 import com.vcudemo.databinding.ActivityMapBinding
@@ -28,6 +30,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     }
 
     private lateinit var binding: ActivityMapBinding
+    private lateinit var viewModel: MapViewModel
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var naverMap: NaverMap
 
@@ -39,52 +42,79 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     private var endLatitude = 0.0
     private var endLongitude = 0.0
 
+    // 내 위치(출발지) 마커
+    private val myLocationMarker = Marker()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate()")
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_map)
+        viewModel = ViewModelProvider(this)[MapViewModel::class.java]
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         NaverMapSdk.getInstance(this).client =
             NaverMapSdk.NaverCloudPlatformClient(com.vcudemo.BuildConfig.NAVER_CLIENT_ID)
 
-        getMyLocation()
         onClickListener()
+        observeLiveData()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            viewModel.getInitMyLocationData(fusedLocationClient)
+        } else {
+            myLatitude = 37.466954
+            myLongitude = 126.886982
+            binding.mapView.getMapAsync(this)
+        }
+    }
+
+    private fun observeLiveData() {
+        viewModel.initMyLocationData.observe(this) {
+            Log.d(TAG, "getInitMyLocationData(): $it")
+
+            if (it != null) {
+                myLatitude = it.latitude
+                myLongitude = it.longitude
+
+            } else {
+                // 위치 정보를 얻지 못했을 경우 임시 좌표 값
+                myLatitude = 37.466954
+                myLongitude = 126.886982
+            }
+
+            binding.mapView.getMapAsync(this)
+            setMyLocationMarker()
+            setMyLocationCamera()
+        }
+
+        viewModel.updateMyLocationData.observe(this) {
+            Log.d(TAG, "updateMyLocationData(): $it")
+            if (it != null) {
+                myLatitude = it.latitude
+                myLongitude = it.longitude
+
+            } else {
+                // 위치 정보를 얻지 못했을 경우 임시 좌표 값
+                myLatitude = 37.466954
+                myLongitude = 126.886982
+            }
+
+            setMyLocationMarker()
+            setMyLocationCamera()
+        }
     }
 
     override fun onMapReady(naverMap: NaverMap) {
         Log.d(TAG, "onMapReady()")
 
         this.naverMap = naverMap
-
-        // 현재 위치 버튼 on
-        naverMap.uiSettings.isLocationButtonEnabled = true
-
-        // 카메라 줌 레벨 및 카메라 이동
-        val cameraPosition = CameraPosition(LatLng(myLatitude, myLongitude), 13.0)
-        naverMap.cameraPosition = cameraPosition
-    }
-
-    /**
-     * 현재 위치 계산
-     * todo : 위치 권한 체크 필요
-     */
-    @SuppressLint("MissingPermission")
-    private fun getMyLocation() {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location : Location? ->
-                Log.d(TAG, "내 위치: $location")
-                if(location?.latitude != null) {
-                    myLatitude = location.latitude
-                    myLongitude = location.longitude
-
-                    binding.mapView.getMapAsync(this)
-                }
-            }
     }
 
     private fun onClickListener() {
+        binding.ibMyLocation.setOnClickListener {
+            viewModel.getUpdateMyLocationData(fusedLocationClient)
+        }
+
         binding.etSearch.setOnClickListener {
             val intent = Intent(this, SearchActivity::class.java)
             intent.putExtra("latitude", myLatitude.toString())
@@ -109,6 +139,24 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * 내 위치 마커 설정
+     */
+    private fun setMyLocationMarker() {
+        myLocationMarker.width = 70
+        myLocationMarker.height = 100
+        myLocationMarker.position = LatLng(myLatitude, myLongitude)
+        myLocationMarker.map = naverMap
+    }
+
+    /**
+     * 내 위치 카메라 설정
+     */
+    private fun setMyLocationCamera() {
+        val cameraPosition = CameraPosition(LatLng(myLatitude, myLongitude), 13.0)
+        naverMap.cameraPosition = cameraPosition
+    }
+
     private val getSearchResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if(result.resultCode == RESULT_OK) {
@@ -128,6 +176,8 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
                 val marker = Marker()
                 marker.width = 70
                 marker.height = 100
+                marker.icon = MarkerIcons.BLACK
+                marker.iconTintColor = Color.RED
                 marker.position = LatLng(endLatitude, endLongitude)
                 marker.map = naverMap
 
