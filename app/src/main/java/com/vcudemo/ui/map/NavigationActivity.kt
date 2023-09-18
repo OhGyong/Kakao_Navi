@@ -52,8 +52,8 @@ class NavigationActivity :
     private var startLongitude = 0.0
 
     // 도착지 좌표
-    private var destinationLatitude = 0.0
-    private var destinationLongitude = 0.0
+    private var endLatitude = 0.0
+    private var endLongitude = 0.0
 
     // 회전 정보
     private var rgCode = ""
@@ -87,14 +87,14 @@ class NavigationActivity :
                         Log.d(VCU_DEMO, "내비 초기화 성공")
                         startLatitude = intent.getDoubleExtra("startLatitude", 0.0)
                         startLongitude = intent.getDoubleExtra("startLongitude", 0.0)
-                        destinationLatitude = intent.getDoubleExtra("destinationLatitude", 0.0)
-                        destinationLongitude = intent.getDoubleExtra("destinationLongitude", 0.0)
+                        endLatitude = intent.getDoubleExtra("endLatitude", 0.0)
+                        endLongitude = intent.getDoubleExtra("endLongitude", 0.0)
 
                         settingMap()
 
                         viewModel.getCoordConvertData(
                             startLatitude, startLongitude,
-                            destinationLatitude, destinationLongitude
+                            endLatitude, endLongitude
                         )
                     }
                 })
@@ -109,17 +109,17 @@ class NavigationActivity :
 
                 val katechStartX = it.success.startLongitude!!.split(".")[0].toInt()
                 val katechStartY = it.success.startLatitude!!.split(".")[0].toInt()
-                val katechDestinationX = it.success.destinationLongitude!!.split(".")[0].toInt()
-                val katechDestinationY = it.success.destinationLatitude!!.split(".")[0].toInt()
+                val katechEndX = it.success.endLongitude!!.split(".")[0].toInt()
+                val katechEndY = it.success.endLatitude!!.split(".")[0].toInt()
 
                 // 출발지 설정
                 val start = KNPOI("", katechStartX, katechStartY, null)
 
                 // 목적지 설정
-                val destination = KNPOI("", katechDestinationX, katechDestinationY, null)
+                val end = KNPOI("", katechEndX, katechEndY, null)
 
                 // 경로 생성
-                KNSDK.makeTripWithStart(start, destination, null, null, aCompletion = { knError: KNError?, knTrip: KNTrip? ->
+                KNSDK.makeTripWithStart(start, end, null, null, aCompletion = { knError: KNError?, knTrip: KNTrip? ->
                     if (knError != null) {
                         Log.d(VCU_DEMO, "경로 생성 에러(KNError: $knError")
                     }

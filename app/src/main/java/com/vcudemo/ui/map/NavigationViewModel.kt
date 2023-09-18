@@ -42,7 +42,7 @@ class NavigationViewModel @Inject constructor(private val navigationRepository: 
 
     fun getCoordConvertData(
         startLatitude: Double, startLongitude: Double,
-        destinationLatitude: Double, destinationLongitude: Double
+        endLatitude: Double, endLongitude: Double
     ) {
         viewModelScope.launch(Dispatchers.Default) {
             try {
@@ -50,17 +50,17 @@ class NavigationViewModel @Inject constructor(private val navigationRepository: 
                     emit(navigationRepository.getCoordConvertData(startLatitude, startLongitude)?.coordinate)
                 }
 
-                val destinationLocationFlow = flow {
-                    emit(navigationRepository.getCoordConvertData(destinationLatitude, destinationLongitude)?.coordinate)
+                val endLocationFlow = flow {
+                    emit(navigationRepository.getCoordConvertData(endLatitude, endLongitude)?.coordinate)
                 }
 
-                startLocationFlow.zip(destinationLocationFlow) { startLocation, destinationResult ->
+                startLocationFlow.zip(endLocationFlow) { startLocation, endResult ->
                     CoordZipResult(
                         success = CoordZipData(
                             startLocation?.lat,
                             startLocation?.lon,
-                            destinationResult?.lat,
-                            destinationResult?.lon
+                            endResult?.lat,
+                            endResult?.lon
                         )
                     )
                 }.collect { coordZipResult->

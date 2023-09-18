@@ -129,8 +129,8 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
             val intent = Intent(this, NavigationActivity::class.java)
             intent.putExtra("startLatitude", myLatitude)
             intent.putExtra("startLongitude", myLongitude)
-            intent.putExtra("destinationLatitude", endLatitude)
-            intent.putExtra("destinationLongitude", endLongitude)
+            intent.putExtra("endLatitude", endLatitude)
+            intent.putExtra("endLongitude", endLongitude)
             startActivity(intent)
             finish()
         }

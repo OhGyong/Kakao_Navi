@@ -8,6 +8,6 @@ data class CoordZipResult (
 data class CoordZipData (
     var startLatitude: String?,
     var startLongitude: String?,
-    var destinationLatitude: String?,
-    var destinationLongitude: String?
+    var endLatitude: String?,
+    var endLongitude: String?
 )
