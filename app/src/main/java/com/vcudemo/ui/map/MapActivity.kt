@@ -41,6 +41,9 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     // 내 위치(출발지) 마커
     private val myLocationMarker = Marker()
 
+    // 도착지 마커
+    private val endMarker = Marker()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(VCU_DEMO, "onCreate()")
@@ -140,6 +143,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
      * 내 위치 마커 설정
      */
     private fun setMyLocationMarker() {
+        myLocationMarker.map = null
         myLocationMarker.width = 70
         myLocationMarker.height = 100
         myLocationMarker.position = LatLng(myLatitude, myLongitude)
@@ -170,13 +174,13 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
                 }
 
                 // 목적지 마커 설정
-                val marker = Marker()
-                marker.width = 70
-                marker.height = 100
-                marker.icon = MarkerIcons.BLACK
-                marker.iconTintColor = Color.RED
-                marker.position = LatLng(endLatitude, endLongitude)
-                marker.map = naverMap
+                endMarker.map = null
+                endMarker.width = 70
+                endMarker.height = 100
+                endMarker.icon = MarkerIcons.BLACK
+                endMarker.iconTintColor = Color.RED
+                endMarker.position = LatLng(endLatitude, endLongitude)
+                endMarker.map = naverMap
 
                 setLocationCamera(endLatitude, endLongitude)
             }else {
