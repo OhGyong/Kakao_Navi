@@ -25,10 +25,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MapActivity: BaseActivity(), OnMapReadyCallback {
-    companion object {
-        const val TAG = "MapActivity"
-    }
-
     private lateinit var binding: ActivityMapBinding
     private lateinit var viewModel: MapViewModel
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -47,7 +43,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "onCreate()")
+        Log.d(VCU_DEMO, "onCreate()")
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_map)
         viewModel = ViewModelProvider(this)[MapViewModel::class.java]
@@ -70,7 +66,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
 
     private fun observeLiveData() {
         viewModel.initMyLocationData.observe(this) {
-            Log.d(TAG, "getInitMyLocationData(): $it")
+            Log.d(VCU_DEMO, "getInitMyLocationData(): $it")
 
             if (it != null) {
                 myLatitude = it.latitude
@@ -89,7 +85,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
         }
 
         viewModel.updateMyLocationData.observe(this) {
-            Log.d(TAG, "updateMyLocationData(): $it")
+            Log.d(VCU_DEMO, "updateMyLocationData(): $it")
             if (it != null) {
                 myLatitude = it.latitude
                 myLongitude = it.longitude
@@ -106,7 +102,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(naverMap: NaverMap) {
-        Log.d(TAG, "onMapReady()")
+        Log.d(VCU_DEMO, "onMapReady()")
 
         this.naverMap = naverMap
     }

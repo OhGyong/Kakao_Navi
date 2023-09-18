@@ -41,13 +41,9 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class NavigationActivity :
-    BaseActivity(), KNGuidance_GuideStateDelegate,
-    KNGuidance_LocationGuideDelegate, KNGuidance_SafetyGuideDelegate,
-    KNGuidance_RouteGuideDelegate, KNGuidance_VoiceGuideDelegate, KNGuidance_CitsGuideDelegate {
-    companion object {
-        const val TAG = "NavigationActivity"
-    }
-
+        BaseActivity(), KNGuidance_GuideStateDelegate,
+        KNGuidance_LocationGuideDelegate, KNGuidance_SafetyGuideDelegate,
+        KNGuidance_RouteGuideDelegate, KNGuidance_VoiceGuideDelegate, KNGuidance_CitsGuideDelegate {
     private lateinit var binding: ActivityNavigationBinding
     private lateinit var viewModel: NavigationViewModel
 
@@ -78,7 +74,7 @@ class NavigationActivity :
                     observeFlow()
 
                     if (it != null) {
-                        Log.d(TAG, "내비 초기화 실패: $it")
+                        Log.d(VCU_DEMO, "내비 초기화 실패: $it")
                         when (it.code) {
                             KNError_Code_C302 -> {
                                 requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
@@ -88,7 +84,7 @@ class NavigationActivity :
                             }
                         }
                     } else {
-                        Log.d(TAG, "내비 초기화 성공")
+                        Log.d(VCU_DEMO, "내비 초기화 성공")
                         startLatitude = intent.getDoubleExtra("startLatitude", 0.0)
                         startLongitude = intent.getDoubleExtra("startLongitude", 0.0)
                         destinationLatitude = intent.getDoubleExtra("destinationLatitude", 0.0)
@@ -108,7 +104,7 @@ class NavigationActivity :
     private fun observeFlow() {
         lifecycleScope.launch {
             viewModel.coordZipResult.collectLatest {
-                Log.d(TAG, "좌표 변환 결과: $it")
+                Log.d(VCU_DEMO, "좌표 변환 결과: $it")
                 if(it.success == null) return@collectLatest
 
                 val katechStartX = it.success.startLongitude!!.split(".")[0].toInt()
@@ -125,7 +121,7 @@ class NavigationActivity :
                 // 경로 생성
                 KNSDK.makeTripWithStart(start, destination, null, null, aCompletion = { knError: KNError?, knTrip: KNTrip? ->
                     if (knError != null) {
-                        Log.d(TAG, "경로 생성 에러(KNError: $knError")
+                        Log.d(VCU_DEMO, "경로 생성 에러(KNError: $knError")
                     }
 
                     // 경로 옵션 설정
@@ -135,11 +131,11 @@ class NavigationActivity :
                     knTrip?.routeWithPriority(curRoutePriority, curAvoidOptions) { error, _ ->
                         // 경로 요청 실패
                         if (error != null) {
-                            Log.d(TAG, "경로 요청 실패 : $error")
+                            Log.d(VCU_DEMO, "경로 요청 실패 : $error")
                         }
                         // 경로 요청 성공
                         else {
-                            Log.d(TAG, "경로 요청 성공")
+                            Log.d(VCU_DEMO, "경로 요청 성공")
                             KNSDK.sharedGuidance()?.apply {
                                 // 각 가이던스 델리게이트 등록
                                 guideStateDelegate = this@NavigationActivity
@@ -165,7 +161,7 @@ class NavigationActivity :
         lifecycleScope.launch {
             viewModel.distanceData.collectLatest {
                 // todo : 실패 case 작성
-                Log.d(TAG, "SK 직선 거리 : ${it.success?.distance}")
+                Log.d(VCU_DEMO, "SK 직선 거리 : ${it.success?.distance}")
                 if(it.success == null) return@collectLatest
                 binding.tvInform.text = "다음 경로: $rgCode ${it.success?.distance}m"
             }
@@ -204,7 +200,6 @@ class NavigationActivity :
                     rgCode = "유턴"
                 }
             }
-
 
             /**
              * SK 직선 거리 API 호출

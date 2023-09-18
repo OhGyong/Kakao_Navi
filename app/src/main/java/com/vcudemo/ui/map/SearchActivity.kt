@@ -20,10 +20,6 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class SearchActivity: BaseActivity() {
-    companion object {
-        const val TAG = "SearchActivity"
-    }
-
     private lateinit var binding: ActivitySearchBinding
     private lateinit var viewModel: SearchViewModel
     private var adapter = SearchAdapter()
@@ -35,7 +31,7 @@ class SearchActivity: BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "onCreate()")
+        Log.d(VCU_DEMO, "onCreate()")
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_search)
         viewModel = ViewModelProvider(this)[SearchViewModel::class.java]
@@ -88,7 +84,7 @@ class SearchActivity: BaseActivity() {
             viewModel.searchPlaceData.collectLatest {
                 // todo : 에러 핸들링
 
-                Log.d(TAG, "searchPlaceData: $it")
+                Log.d(VCU_DEMO, "searchPlaceData: $it")
                 if(it.success == null ) return@collectLatest
 
                 searchList = it.success.documents as ArrayList<Document>
