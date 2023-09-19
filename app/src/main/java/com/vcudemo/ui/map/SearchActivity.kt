@@ -82,12 +82,27 @@ class SearchActivity: BaseActivity() {
     private fun observeFlow() {
         lifecycleScope.launch {
             viewModel.searchPlaceData.collectLatest {
+                Log.d(VCU_DEMO, "searchPlaceData: $it")
+
                 // todo : 에러 핸들링
 
-                Log.d(VCU_DEMO, "searchPlaceData: $it")
                 if(it.success == null ) return@collectLatest
 
-                searchList = it.success.documents as ArrayList<Document>
+                val meta = it.success.meta
+                val documents = it.success.documents
+
+                if(meta.totalCount == 0) {
+                    binding.tvEmptyList.setText(R.string.empty_search_list)
+                    binding.tvEmptyList.visibility = View.VISIBLE
+                } else {
+                    binding.tvEmptyList.visibility = View.GONE
+                    if(meta.totalCount == 1) {
+                        searchList.add(documents[0])
+                    }else {
+                        searchList = documents as ArrayList<Document>
+                    }
+                }
+
                 adapter.setItem(searchList)
             }
         }
