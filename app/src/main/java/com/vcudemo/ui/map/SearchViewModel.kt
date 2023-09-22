@@ -13,19 +13,19 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(private val mapRepository: MapRepository): ViewModel(){
-    private val _searchPlaceData: MutableStateFlow<SearchPlaceResult> = MutableStateFlow(
-        SearchPlaceResult()
-    )
+    private val _searchPlaceData: MutableStateFlow<SearchPlaceResult> = MutableStateFlow(SearchPlaceResult())
     val searchPlaceData: StateFlow<SearchPlaceResult> = _searchPlaceData
 
     fun getSearchPlaceData(query: String, x: String, y: String) {
         viewModelScope.launch(Dispatchers.Default) {
             try{
-                _searchPlaceData.value = SearchPlaceResult(
-                    success = mapRepository.getSearchPlaceData(query, x, y)
+                _searchPlaceData.emit(
+                    SearchPlaceResult(success = mapRepository.getSearchPlaceData(query, x, y))
                 )
             } catch (e: Exception) {
-                _searchPlaceData.value = SearchPlaceResult(failure = e)
+                _searchPlaceData.emit(
+                    SearchPlaceResult(failure = e)
+                )
             }
         }
     }
