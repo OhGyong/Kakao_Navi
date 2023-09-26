@@ -177,6 +177,14 @@ class NavigationActivity :
     }
 
     /**
+     * 뒤로 가기 이벤트
+     * - Navigation 종료
+     */
+    override fun onBackPressed() {
+        guidanceGuideEnded(binding.naviView.guidance)
+    }
+
+    /**
      * 경로 안내 정보 업데이트 시 호출
      * `routeGuide`의 항목이 1개 이상 변경 시 전달됨.
      */
@@ -211,6 +219,15 @@ class NavigationActivity :
         }
     }
 
+    /**
+     * 길 안내 종료 시 호출
+     */
+    override fun guidanceGuideEnded(aGuidance: KNGuidance) {
+        Log.d(VCU_DEMO, "guidanceGuideEnded 내비게이션 종료")
+        binding.naviView.guidanceGuideEnded(aGuidance, false) // 종료 팝업 노출x
+        finish()
+    }
+
     override fun guidanceCheckingRouteChange(aGuidance: KNGuidance) {
         binding.naviView.guidanceCheckingRouteChange(aGuidance)
     }
@@ -221,10 +238,6 @@ class NavigationActivity :
         aMultiRouteInfo: KNMultiRouteInfo?
     ) {
         binding.naviView.guidanceDidUpdateRoutes(aGuidance, aRoutes, aMultiRouteInfo)
-    }
-
-    override fun guidanceGuideEnded(aGuidance: KNGuidance) {
-        binding.naviView.guidanceGuideEnded(aGuidance)
     }
 
     override fun guidanceGuideStarted(aGuidance: KNGuidance) {
