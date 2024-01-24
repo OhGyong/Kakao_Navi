@@ -1,12 +1,16 @@
 package com.navirotation.ui.map
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -29,6 +33,11 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     private lateinit var viewModel: MapViewModel
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var naverMap: NaverMap
+
+    private val permissionArray = arrayOf(
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
 
     // 내 위치(출발지) 좌표
     private var myLatitude = 0.0
@@ -58,12 +67,18 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
         onClickListener()
         observeLiveData()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            viewModel.getInitMyLocationData(fusedLocationClient)
+        if(permissionArray.all{
+                ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+        }) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                viewModel.getInitMyLocationData(fusedLocationClient)
+            } else {
+                myLatitude = 37.466954
+                myLongitude = 126.886982
+                binding.mapView.getMapAsync(this)
+            }
         } else {
-            myLatitude = 37.466954
-            myLongitude = 126.886982
-            binding.mapView.getMapAsync(this)
+            requestPermissions(permissionArray, 1)
         }
     }
 
@@ -101,6 +116,35 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
 
             setMyLocationMarker()
             setLocationCamera(myLatitude, myLongitude)
+        }
+    }
+
+    /**
+     * 권한 핸들링
+     */
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if(requestCode == 1) {
+            if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    viewModel.getInitMyLocationData(fusedLocationClient)
+                } else {
+                    myLatitude = 37.466954
+                    myLongitude = 126.886982
+                    binding.mapView.getMapAsync(this)
+                }
+            } else {
+                if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                    requestPermissions(permissionArray, 1)
+                }else{
+                    Toast.makeText(this, "권한 다시 묻지 않음 상태입니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
