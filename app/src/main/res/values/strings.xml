@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">VcuDemo</string>
+    <string name="app_name">Navi_Rotation</string>
     <string name="search_hint">검색</string>
     <string name="find_road">길찾기</string>
     <string name="search_destination">도착지를 검색해주세요.</string>

@@ -7,7 +7,7 @@
     <data>
         <variable
             name="searchItem"
-            type="com.vcudemo.data.map.SearchPlaceResponse.Document" />
+            type="com.navirotation.data.map.SearchPlaceResponse.Document" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -17,6 +17,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "VcuDemo"
+rootProject.name = "NaviRotation"
 include(":app")
  
