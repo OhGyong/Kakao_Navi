@@ -73,8 +73,8 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 viewModel.getInitMyLocationData(fusedLocationClient)
             } else {
-                myLatitude = 37.466954
-                myLongitude = 126.886982
+                myLatitude = 37.55453
+                myLongitude = 126.97071
                 binding.mapView.getMapAsync(this)
             }
         } else {
@@ -92,8 +92,8 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
 
             } else {
                 // 위치 정보를 얻지 못했을 경우 임시 좌표 값
-                myLatitude = 37.466954
-                myLongitude = 126.886982
+                myLatitude = 37.55453
+                myLongitude = 126.97071
             }
 
             binding.mapView.getMapAsync(this)
@@ -110,8 +110,8 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
 
             } else {
                 // 위치 정보를 얻지 못했을 경우 임시 좌표 값
-                myLatitude = 37.466954
-                myLongitude = 126.886982
+                myLatitude = 37.55453
+                myLongitude = 126.97071
             }
 
             setMyLocationMarker()
@@ -134,8 +134,8 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     viewModel.getInitMyLocationData(fusedLocationClient)
                 } else {
-                    myLatitude = 37.466954
-                    myLongitude = 126.886982
+                    myLatitude = 37.55453
+                    myLongitude = 126.97071
                     binding.mapView.getMapAsync(this)
                 }
             } else {
