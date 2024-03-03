@@ -66,7 +66,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
     // kakao navi
-    implementation("com.kakaomobility.knsdk:knsdk_ui:1.6.6")
+    implementation("com.kakaomobility.knsdk:knsdk_ui:1.9.4")
 
     // Naver Map
     implementation("com.naver.maps:map-sdk:3.17.0")

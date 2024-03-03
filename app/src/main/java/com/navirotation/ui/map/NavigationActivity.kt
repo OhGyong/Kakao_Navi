@@ -12,6 +12,7 @@ import com.kakaomobility.knsdk.KNRouteAvoidOption
 import com.kakaomobility.knsdk.KNRoutePriority
 import com.kakaomobility.knsdk.KNSDK
 import com.kakaomobility.knsdk.common.objects.KNError
+import com.kakaomobility.knsdk.common.objects.KNError_Code_C103
 import com.kakaomobility.knsdk.common.objects.KNError_Code_C302
 import com.kakaomobility.knsdk.common.objects.KNPOI
 import com.kakaomobility.knsdk.guidance.knguidance.KNGuidance
@@ -21,7 +22,9 @@ import com.kakaomobility.knsdk.guidance.knguidance.KNGuidance_LocationGuideDeleg
 import com.kakaomobility.knsdk.guidance.knguidance.KNGuidance_RouteGuideDelegate
 import com.kakaomobility.knsdk.guidance.knguidance.KNGuidance_SafetyGuideDelegate
 import com.kakaomobility.knsdk.guidance.knguidance.KNGuidance_VoiceGuideDelegate
+import com.kakaomobility.knsdk.guidance.knguidance.KNGuideRouteChangeReason
 import com.kakaomobility.knsdk.guidance.knguidance.citsguide.KNGuide_Cits
+import com.kakaomobility.knsdk.guidance.knguidance.common.KNLocation
 import com.kakaomobility.knsdk.guidance.knguidance.locationguide.KNGuide_Location
 import com.kakaomobility.knsdk.guidance.knguidance.routeguide.KNGuide_Route
 import com.kakaomobility.knsdk.guidance.knguidance.routeguide.objects.KNMultiRouteInfo
@@ -41,9 +44,9 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class NavigationActivity :
-        BaseActivity(), KNGuidance_GuideStateDelegate,
-        KNGuidance_LocationGuideDelegate, KNGuidance_SafetyGuideDelegate,
-        KNGuidance_RouteGuideDelegate, KNGuidance_VoiceGuideDelegate, KNGuidance_CitsGuideDelegate {
+    BaseActivity(), KNGuidance_GuideStateDelegate,
+    KNGuidance_LocationGuideDelegate, KNGuidance_SafetyGuideDelegate,
+    KNGuidance_RouteGuideDelegate, KNGuidance_VoiceGuideDelegate, KNGuidance_CitsGuideDelegate {
     private lateinit var binding: ActivityNavigationBinding
     private lateinit var viewModel: NavigationViewModel
 
@@ -64,27 +67,30 @@ class NavigationActivity :
         KNSDK.apply {
             install(application, "$filesDir/files") // 콘텍스트 등록 및 DB, 파일 등의 저장 경로 설정
             initializeWithAppKey(
-                com.navirotation.BuildConfig.KAKAO_NATIVE_APP_KEY,
-                BuildConfig.VERSION_NAME,
-                com.navirotation.BuildConfig.USER_KEY,
+                com.navirotation.BuildConfig.KAKAO_REST_API_KEY,
+                com.navirotation.BuildConfig.VERSION_NAME,
+                null,
                 KNLanguageType.KNLanguageType_KOREAN,
                 aCompletion = {
-                    binding = DataBindingUtil.setContentView(this@NavigationActivity, R.layout.activity_navigation)
-                    viewModel = ViewModelProvider(this@NavigationActivity)[NavigationViewModel::class.java]
-                    observeFlow()
-
                     if (it != null) {
-                        Log.d(VCU_DEMO, "내비 초기화 실패: $it")
                         when (it.code) {
+                            KNError_Code_C103 -> {
+                                Log.d(VCU_DEMO, "내비 인증 실패: $it")
+                                return@initializeWithAppKey
+                            }
                             KNError_Code_C302 -> {
+                                Log.d(VCU_DEMO, "내비 권한 오류 : $it")
                                 requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
+                                return@initializeWithAppKey
                             }
                             else -> {
-                                // todo : 추가 에러 작성
+                                Log.d(VCU_DEMO, "내비 초기화 실패: $it")
+                                return@initializeWithAppKey
                             }
                         }
                     } else {
                         Log.d(VCU_DEMO, "내비 초기화 성공")
+
                         startLatitude = intent.getDoubleExtra("startLatitude", 0.0)
                         startLongitude = intent.getDoubleExtra("startLongitude", 0.0)
                         endLatitude = intent.getDoubleExtra("endLatitude", 0.0)
@@ -99,6 +105,10 @@ class NavigationActivity :
                     }
                 })
         }
+
+        binding = DataBindingUtil.setContentView(this@NavigationActivity, R.layout.activity_navigation)
+        viewModel = ViewModelProvider(this@NavigationActivity)[NavigationViewModel::class.java]
+        observeFlow()
     }
 
     private fun observeFlow() {
@@ -213,8 +223,8 @@ class NavigationActivity :
              * SK 직선 거리 API 호출
              */
             viewModel.getDistanceData(
-                aRouteGuide.curDirection?.location?.pos!!,
-                aRouteGuide.nextDirection?.location?.pos!!
+                aRouteGuide.curDirection?.location?.pos!!.toFloatPoint(),
+                aRouteGuide.nextDirection?.location?.pos!!.toFloatPoint()
             )
         }
     }
@@ -248,9 +258,17 @@ class NavigationActivity :
         binding.naviView.guidanceOutOfRoute(aGuidance)
     }
 
-    override fun guidanceRouteChanged(aGuidance: KNGuidance) {
+    override fun guidanceRouteChanged(
+        aGuidance: KNGuidance,
+        aFromRoute: KNRoute,
+        aFromLocation: KNLocation,
+        aToRoute: KNRoute,
+        aToLocation: KNLocation,
+        aChangeReason: KNGuideRouteChangeReason
+    ) {
         binding.naviView.guidanceRouteChanged(aGuidance)
     }
+
 
     override fun guidanceRouteUnchanged(aGuidance: KNGuidance) {
         binding.naviView.guidanceRouteUnchanged(aGuidance)
