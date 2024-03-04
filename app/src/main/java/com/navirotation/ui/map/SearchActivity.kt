@@ -31,7 +31,7 @@ class SearchActivity: BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(VCU_DEMO, "onCreate()")
+        Log.d(NAVI_ROTATION, "onCreate()")
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_search)
         viewModel = ViewModelProvider(this)[SearchViewModel::class.java]
@@ -82,7 +82,7 @@ class SearchActivity: BaseActivity() {
     private fun observeFlow() {
         lifecycleScope.launch {
             viewModel.searchPlaceData.collectLatest {
-                Log.d(VCU_DEMO, "searchPlaceData: $it")
+                Log.d(NAVI_ROTATION, "searchPlaceData: $it")
 
                 // todo : 에러 핸들링
 

@@ -34,6 +34,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var naverMap: NaverMap
 
+    // 위치 권한 Array
     private val permissionArray = arrayOf(
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.ACCESS_FINE_LOCATION
@@ -55,7 +56,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(VCU_DEMO, "onCreate()")
+        Log.d(NAVI_ROTATION, "onCreate()")
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_map)
         viewModel = ViewModelProvider(this)[MapViewModel::class.java]
@@ -67,6 +68,11 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
         onClickListener()
         observeLiveData()
 
+        /**
+         * 권한 체크
+         * - 권한 허용 O : 현재 위치 좌표 값 업데이트
+         * - 권한 허용 X : 권한 요청
+         */
         if(permissionArray.all{
                 ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
         }) {
@@ -84,12 +90,11 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
 
     private fun observeLiveData() {
         viewModel.initMyLocationData.observe(this) {
-            Log.d(VCU_DEMO, "getInitMyLocationData(): $it")
+            Log.d(NAVI_ROTATION, "getInitMyLocationData(): $it")
 
             if (it != null) {
                 myLatitude = it.latitude
                 myLongitude = it.longitude
-
             } else {
                 // 위치 정보를 얻지 못했을 경우 임시 좌표 값
                 myLatitude = 37.55453
@@ -103,7 +108,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
         }
 
         viewModel.updateMyLocationData.observe(this) {
-            Log.d(VCU_DEMO, "updateMyLocationData(): $it")
+            Log.d(NAVI_ROTATION, "updateMyLocationData(): $it")
             if (it != null) {
                 myLatitude = it.latitude
                 myLongitude = it.longitude
@@ -149,7 +154,7 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(naverMap: NaverMap) {
-        Log.d(VCU_DEMO, "onMapReady()")
+        Log.d(NAVI_ROTATION, "onMapReady()")
 
         this.naverMap = naverMap
     }

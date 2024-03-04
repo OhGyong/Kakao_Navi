@@ -75,21 +75,21 @@ class NavigationActivity :
                     if (it != null) {
                         when (it.code) {
                             KNError_Code_C103 -> {
-                                Log.d(VCU_DEMO, "내비 인증 실패: $it")
+                                Log.d(NAVI_ROTATION, "내비 인증 실패: $it")
                                 return@initializeWithAppKey
                             }
                             KNError_Code_C302 -> {
-                                Log.d(VCU_DEMO, "내비 권한 오류 : $it")
+                                Log.d(NAVI_ROTATION, "내비 권한 오류 : $it")
                                 requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
                                 return@initializeWithAppKey
                             }
                             else -> {
-                                Log.d(VCU_DEMO, "내비 초기화 실패: $it")
+                                Log.d(NAVI_ROTATION, "내비 초기화 실패: $it")
                                 return@initializeWithAppKey
                             }
                         }
                     } else {
-                        Log.d(VCU_DEMO, "내비 초기화 성공")
+                        Log.d(NAVI_ROTATION, "내비 초기화 성공")
 
                         startLatitude = intent.getDoubleExtra("startLatitude", 0.0)
                         startLongitude = intent.getDoubleExtra("startLongitude", 0.0)
@@ -114,7 +114,7 @@ class NavigationActivity :
     private fun observeFlow() {
         lifecycleScope.launch {
             viewModel.coordZipResult.collectLatest {
-                Log.d(VCU_DEMO, "좌표 변환 결과: $it")
+                Log.d(NAVI_ROTATION, "좌표 변환 결과: $it")
                 if(it.success == null) return@collectLatest
 
                 val katechStartX = it.success.startLongitude!!.split(".")[0].toInt()
@@ -131,7 +131,7 @@ class NavigationActivity :
                 // 경로 생성
                 KNSDK.makeTripWithStart(start, end, null, null, aCompletion = { knError: KNError?, knTrip: KNTrip? ->
                     if (knError != null) {
-                        Log.d(VCU_DEMO, "경로 생성 에러(KNError: $knError")
+                        Log.d(NAVI_ROTATION, "경로 생성 에러(KNError: $knError")
                     }
 
                     // 경로 옵션 설정
@@ -141,11 +141,11 @@ class NavigationActivity :
                     knTrip?.routeWithPriority(curRoutePriority, curAvoidOptions) { error, _ ->
                         // 경로 요청 실패
                         if (error != null) {
-                            Log.d(VCU_DEMO, "경로 요청 실패 : $error")
+                            Log.d(NAVI_ROTATION, "경로 요청 실패 : $error")
                         }
                         // 경로 요청 성공
                         else {
-                            Log.d(VCU_DEMO, "경로 요청 성공")
+                            Log.d(NAVI_ROTATION, "경로 요청 성공")
                             KNSDK.sharedGuidance()?.apply {
                                 // 각 가이던스 델리게이트 등록
                                 guideStateDelegate = this@NavigationActivity
@@ -171,7 +171,7 @@ class NavigationActivity :
         lifecycleScope.launch {
             viewModel.distanceData.collectLatest {
                 // todo : 실패 case 작성
-                Log.d(VCU_DEMO, "SK 직선 거리 : ${it.success?.distance}")
+                Log.d(NAVI_ROTATION, "SK 직선 거리 : ${it.success?.distance}")
                 if(it.success == null) return@collectLatest
                 binding.tvInform.text = "다음 경로: $rgCode ${it.success?.distance}m"
             }
@@ -233,7 +233,7 @@ class NavigationActivity :
      * 길 안내 종료 시 호출
      */
     override fun guidanceGuideEnded(aGuidance: KNGuidance) {
-        Log.d(VCU_DEMO, "guidanceGuideEnded 내비게이션 종료")
+        Log.d(NAVI_ROTATION, "guidanceGuideEnded 내비게이션 종료")
         binding.naviView.guidanceGuideEnded(aGuidance, false) // 종료 팝업 노출x
         finish()
     }
