@@ -42,6 +42,7 @@ class NavigationActivity :
     BaseActivity(), KNGuidance_GuideStateDelegate,
     KNGuidance_LocationGuideDelegate, KNGuidance_SafetyGuideDelegate,
     KNGuidance_RouteGuideDelegate, KNGuidance_VoiceGuideDelegate, KNGuidance_CitsGuideDelegate {
+
     private lateinit var binding: ActivityNavigationBinding
     private lateinit var viewModel: NavigationViewModel
 
