@@ -184,9 +184,8 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
         }
 
         binding.btnIntentNavi.setOnClickListener {
-            // 카카오 내비게이션 인스톨 및 초기화
+            // 카카오 내비게이션 초기화
             KNSDK.apply {
-                install(application, "$filesDir/files") // 콘텍스트 등록 및 DB, 파일 등의 저장 경로 설정
                 initializeWithAppKey(
                     com.navirotation.BuildConfig.KAKAO_NATIVE_APP_KEY,
                     com.navirotation.BuildConfig.VERSION_NAME,
