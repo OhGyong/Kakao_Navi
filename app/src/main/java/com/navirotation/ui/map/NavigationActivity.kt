@@ -1,21 +1,15 @@
 package com.navirotation.ui.map
 
-import android.Manifest
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.kakaomobility.knsdk.KNCarType
-import com.kakaomobility.knsdk.KNLanguageType
 import com.kakaomobility.knsdk.KNRouteAvoidOption
 import com.kakaomobility.knsdk.KNRoutePriority
 import com.kakaomobility.knsdk.KNSDK
 import com.kakaomobility.knsdk.common.objects.KNError
-import com.kakaomobility.knsdk.common.objects.KNError_Code_C103
-import com.kakaomobility.knsdk.common.objects.KNError_Code_C302
 import com.kakaomobility.knsdk.common.objects.KNPOI
 import com.kakaomobility.knsdk.guidance.knguidance.KNGuidance
 import com.kakaomobility.knsdk.guidance.knguidance.KNGuidance_CitsGuideDelegate
@@ -36,7 +30,6 @@ import com.kakaomobility.knsdk.guidance.knguidance.voiceguide.KNGuide_Voice
 import com.kakaomobility.knsdk.trip.kntrip.KNTrip
 import com.kakaomobility.knsdk.trip.kntrip.knroute.KNRoute
 import com.kakaomobility.knsdk.ui.component.MapViewCameraMode
-import com.kakaomobility.location.library.BuildConfig
 import com.navirotation.R
 import com.navirotation.base.BaseActivity
 import com.navirotation.databinding.ActivityNavigationBinding
