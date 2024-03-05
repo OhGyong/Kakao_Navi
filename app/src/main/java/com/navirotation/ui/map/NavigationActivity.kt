@@ -67,7 +67,7 @@ class NavigationActivity :
         KNSDK.apply {
             install(application, "$filesDir/files") // 콘텍스트 등록 및 DB, 파일 등의 저장 경로 설정
             initializeWithAppKey(
-                com.navirotation.BuildConfig.KAKAO_REST_API_KEY,
+                com.navirotation.BuildConfig.KAKAO_NATIVE_APP_KEY,
                 com.navirotation.BuildConfig.VERSION_NAME,
                 null,
                 KNLanguageType.KNLanguageType_KOREAN,
