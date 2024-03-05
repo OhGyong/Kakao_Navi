@@ -2,6 +2,8 @@ package com.navirotation.ui.map
 
 import android.Manifest
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -63,59 +65,28 @@ class NavigationActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        KNSDK.apply {
-            install(application, "$filesDir/files") // 콘텍스트 등록 및 DB, 파일 등의 저장 경로 설정
-            initializeWithAppKey(
-                com.navirotation.BuildConfig.KAKAO_NATIVE_APP_KEY,
-                com.navirotation.BuildConfig.VERSION_NAME,
-                null,
-                KNLanguageType.KNLanguageType_KOREAN,
-                aCompletion = {
-                    if (it != null) {
-                        when (it.code) {
-                            KNError_Code_C103 -> {
-                                Log.d(NAVI_ROTATION, "내비 인증 실패: $it")
-                                return@initializeWithAppKey
-                            }
-                            KNError_Code_C302 -> {
-                                Log.d(NAVI_ROTATION, "내비 권한 오류 : $it")
-                                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
-                                return@initializeWithAppKey
-                            }
-                            else -> {
-                                Log.d(NAVI_ROTATION, "내비 초기화 실패: $it")
-                                return@initializeWithAppKey
-                            }
-                        }
-                    } else {
-                        Log.d(NAVI_ROTATION, "내비 초기화 성공")
-
-                        startLatitude = intent.getDoubleExtra("startLatitude", 0.0)
-                        startLongitude = intent.getDoubleExtra("startLongitude", 0.0)
-                        endLatitude = intent.getDoubleExtra("endLatitude", 0.0)
-                        endLongitude = intent.getDoubleExtra("endLongitude", 0.0)
-
-                        settingMap()
-
-                        viewModel.getCoordConvertData(
-                            startLatitude, startLongitude,
-                            endLatitude, endLongitude
-                        )
-                    }
-                })
-        }
-
-        binding = DataBindingUtil.setContentView(this@NavigationActivity, R.layout.activity_navigation)
+        binding =
+            DataBindingUtil.setContentView(this@NavigationActivity, R.layout.activity_navigation)
         viewModel = ViewModelProvider(this@NavigationActivity)[NavigationViewModel::class.java]
         observeFlow()
+        settingMap()
+
+        startLatitude = intent.getDoubleExtra("startLatitude", 0.0)
+        startLongitude = intent.getDoubleExtra("startLongitude", 0.0)
+        endLatitude = intent.getDoubleExtra("endLatitude", 0.0)
+        endLongitude = intent.getDoubleExtra("endLongitude", 0.0)
+
+        viewModel.getCoordConvertData(
+            startLatitude, startLongitude,
+            endLatitude, endLongitude
+        )
     }
 
     private fun observeFlow() {
         lifecycleScope.launch {
             viewModel.coordZipResult.collectLatest {
                 Log.d(NAVI_ROTATION, "좌표 변환 결과: $it")
-                if(it.success == null) return@collectLatest
+                if (it.success == null) return@collectLatest
 
                 val katechStartX = it.success.startLongitude!!.split(".")[0].toInt()
                 val katechStartY = it.success.startLatitude!!.split(".")[0].toInt()
@@ -129,42 +100,48 @@ class NavigationActivity :
                 val end = KNPOI("", katechEndX, katechEndY, null)
 
                 // 경로 생성
-                KNSDK.makeTripWithStart(start, end, null, null, aCompletion = { knError: KNError?, knTrip: KNTrip? ->
-                    if (knError != null) {
-                        Log.d(NAVI_ROTATION, "경로 생성 에러(KNError: $knError")
-                    }
-
-                    // 경로 옵션 설정
-                    val curRoutePriority = KNRoutePriority.valueOf(KNRoutePriority.KNRoutePriority_Recommand.toString())   // 경로 안내에서 우선적 고려 항목
-                    val curAvoidOptions = KNRouteAvoidOption.KNRouteAvoidOption_None.value
-
-                    knTrip?.routeWithPriority(curRoutePriority, curAvoidOptions) { error, _ ->
-                        // 경로 요청 실패
-                        if (error != null) {
-                            Log.d(NAVI_ROTATION, "경로 요청 실패 : $error")
+                KNSDK.makeTripWithStart(
+                    start,
+                    end,
+                    null,
+                    null,
+                    aCompletion = { knError: KNError?, knTrip: KNTrip? ->
+                        if (knError != null) {
+                            Log.d(NAVI_ROTATION, "경로 생성 에러(KNError: $knError")
                         }
-                        // 경로 요청 성공
-                        else {
-                            Log.d(NAVI_ROTATION, "경로 요청 성공")
-                            KNSDK.sharedGuidance()?.apply {
-                                // 각 가이던스 델리게이트 등록
-                                guideStateDelegate = this@NavigationActivity
-                                locationGuideDelegate = this@NavigationActivity
-                                routeGuideDelegate = this@NavigationActivity
-                                safetyGuideDelegate = this@NavigationActivity
-                                voiceGuideDelegate = this@NavigationActivity
-                                citsGuideDelegate = this@NavigationActivity
 
-                                binding.naviView.initWithGuidance(
-                                    this,
-                                    knTrip,
-                                    curRoutePriority,
-                                    curAvoidOptions
-                                )
+                        // 경로 옵션 설정
+                        val curRoutePriority =
+                            KNRoutePriority.valueOf(KNRoutePriority.KNRoutePriority_Recommand.toString())   // 경로 안내에서 우선적 고려 항목
+                        val curAvoidOptions = KNRouteAvoidOption.KNRouteAvoidOption_None.value
+
+                        knTrip?.routeWithPriority(curRoutePriority, curAvoidOptions) { error, _ ->
+                            // 경로 요청 실패
+                            if (error != null) {
+                                Log.d(NAVI_ROTATION, "경로 요청 실패 : $error")
+                            }
+                            // 경로 요청 성공
+                            else {
+                                Log.d(NAVI_ROTATION, "경로 요청 성공")
+                                KNSDK.sharedGuidance()?.apply {
+                                    // 각 가이던스 델리게이트 등록
+                                    guideStateDelegate = this@NavigationActivity
+                                    locationGuideDelegate = this@NavigationActivity
+                                    routeGuideDelegate = this@NavigationActivity
+                                    safetyGuideDelegate = this@NavigationActivity
+                                    voiceGuideDelegate = this@NavigationActivity
+                                    citsGuideDelegate = this@NavigationActivity
+
+                                    binding.naviView.initWithGuidance(
+                                        this,
+                                        knTrip,
+                                        curRoutePriority,
+                                        curAvoidOptions
+                                    )
+                                }
                             }
                         }
-                    }
-                })
+                    })
             }
         }
 
@@ -172,7 +149,7 @@ class NavigationActivity :
             viewModel.distanceData.collectLatest {
                 // todo : 실패 case 작성
                 Log.d(NAVI_ROTATION, "SK 직선 거리 : ${it.success?.distance}")
-                if(it.success == null) return@collectLatest
+                if (it.success == null) return@collectLatest
                 binding.tvInform.text = "다음 경로: $rgCode ${it.success?.distance}m"
             }
         }
@@ -183,7 +160,8 @@ class NavigationActivity :
      */
     private fun settingMap() {
         binding.naviView.mapViewMode = MapViewCameraMode.Top // 2D 모드
-        binding.naviView.carType = KNCarType.KNCarType_Bike // 자동차: KNCarType_1, 오토바이: KNCarType_Bike
+        binding.naviView.carType =
+            KNCarType.KNCarType_Bike // 자동차: KNCarType_1, 오토바이: KNCarType_Bike
     }
 
     /**
@@ -201,19 +179,22 @@ class NavigationActivity :
     override fun guidanceDidUpdateRouteGuide(aGuidance: KNGuidance, aRouteGuide: KNGuide_Route) {
         binding.naviView.guidanceDidUpdateRouteGuide(aGuidance, aRouteGuide)
 
-        if(aRouteGuide.curDirection?.location?.pos != null && aRouteGuide.nextDirection?.location?.pos != null) {
+        if (aRouteGuide.curDirection?.location?.pos != null && aRouteGuide.nextDirection?.location?.pos != null) {
             rgCode = aRouteGuide.nextDirection?.rgCode.toString()
             // todo : 모든 rgCode를 적용해야하나?
-            when(rgCode) {
+            when (rgCode) {
                 "KNRGCode_Straight" -> {
                     rgCode = "직진"
                 }
+
                 "KNRGCode_LeftTurn" -> {
                     rgCode = "좌회전"
                 }
+
                 "KNRGCode_RightTurn" -> {
                     rgCode = "우회전"
                 }
+
                 "KNRGCode_UTurn" -> {
                     rgCode = "유턴"
                 }
