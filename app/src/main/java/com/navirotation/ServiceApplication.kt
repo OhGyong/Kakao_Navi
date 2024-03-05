@@ -8,7 +8,7 @@ import dagger.hilt.android.HiltAndroidApp
 class ServiceApplication: Application()  {
     override fun onCreate() {
         super.onCreate()
-        // 카카오 내비
+        // KNSDK 등록
         KNSDK.install(this, "$filesDir/files")
     }
 }
