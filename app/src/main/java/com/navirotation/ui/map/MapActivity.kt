@@ -185,43 +185,45 @@ class MapActivity: BaseActivity(), OnMapReadyCallback {
 
         binding.btnIntentNavi.setOnClickListener {
             // 카카오 내비게이션 초기화
-            KNSDK.apply {
-                initializeWithAppKey(
-                    com.navirotation.BuildConfig.KAKAO_NATIVE_APP_KEY,
-                    com.navirotation.BuildConfig.VERSION_NAME,
-                    null,
-                    KNLanguageType.KNLanguageType_KOREAN,
-                    aCompletion = {
-                        if (it != null) {
-                            when (it.code) {
-                                KNError_Code_C103 -> {
-                                    Log.d(NAVI_ROTATION, "내비 인증 실패: $it")
-                                    return@initializeWithAppKey
-                                }
-                                KNError_Code_C302 -> {
-                                    Log.d(NAVI_ROTATION, "내비 권한 오류 : $it")
-                                    requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
-                                    return@initializeWithAppKey
-                                }
-                                else -> {
-                                    Log.d(NAVI_ROTATION, "내비 초기화 실패: $it")
-                                    return@initializeWithAppKey
-                                }
+            KNSDK.initializeWithAppKey(
+                com.navirotation.BuildConfig.KAKAO_NATIVE_APP_KEY,
+                com.navirotation.BuildConfig.VERSION_NAME,
+                null,
+                KNLanguageType.KNLanguageType_KOREAN,
+                aCompletion = {
+                    if (it != null) {
+                        when (it.code) {
+                            KNError_Code_C103 -> {
+                                Log.d(NAVI_ROTATION, "내비 인증 실패: $it")
+                                return@initializeWithAppKey
                             }
-                        } else {
-                            Log.d(NAVI_ROTATION, "내비 초기화 성공")
-                            Handler(Looper.getMainLooper()).post {
-                                val intent = Intent(applicationContext, NavigationActivity::class.java)
-                                intent.putExtra("startLatitude", myLatitude)
-                                intent.putExtra("startLongitude", myLongitude)
-                                intent.putExtra("endLatitude", endLatitude)
-                                intent.putExtra("endLongitude", endLongitude)
-                                startActivity(intent)
-                                finish()
+
+                            KNError_Code_C302 -> {
+                                Log.d(NAVI_ROTATION, "내비 권한 오류 : $it")
+                                requestPermissions(
+                                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                                    1
+                                )
+                                return@initializeWithAppKey
+                            }
+
+                            else -> {
+                                Log.d(NAVI_ROTATION, "내비 초기화 실패: $it")
+                                return@initializeWithAppKey
                             }
                         }
-                    })
-            }
+                    } else {
+                        Log.d(NAVI_ROTATION, "내비 초기화 성공")
+
+                        val intent = Intent(applicationContext, NavigationActivity::class.java)
+                        intent.putExtra("startLatitude", myLatitude)
+                        intent.putExtra("startLongitude", myLongitude)
+                        intent.putExtra("endLatitude", endLatitude)
+                        intent.putExtra("endLongitude", endLongitude)
+                        startActivity(intent)
+                        finish()
+                    }
+                })
         }
     }
 
