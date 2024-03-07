@@ -59,11 +59,10 @@ class NavigationActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding =
-            DataBindingUtil.setContentView(this@NavigationActivity, R.layout.activity_navigation)
+        binding = DataBindingUtil.setContentView(this@NavigationActivity, R.layout.activity_navigation)
         viewModel = ViewModelProvider(this@NavigationActivity)[NavigationViewModel::class.java]
+
         observeFlow()
-        settingMap()
 
         startLatitude = intent.getDoubleExtra("startLatitude", 0.0)
         startLongitude = intent.getDoubleExtra("startLongitude", 0.0)
@@ -93,7 +92,11 @@ class NavigationActivity :
                 // 목적지 설정
                 val end = KNPOI("", katechEndX, katechEndY, null)
 
-                // 경로 생성
+                /**
+                 * 경로 옵션 설정
+                 * 1. KNRoutePriority : 목적지까지의 경로 안내 옵션 중 우선적으로 고려할 항목 설정
+                 * 2. KNRouteAvoidOption : 경로에서 회피하고 싶은 구간 설정
+                 */
                 KNSDK.makeTripWithStart(
                     start,
                     end,
@@ -105,8 +108,7 @@ class NavigationActivity :
                         }
 
                         // 경로 옵션 설정
-                        val curRoutePriority =
-                            KNRoutePriority.valueOf(KNRoutePriority.KNRoutePriority_Recommand.toString())   // 경로 안내에서 우선적 고려 항목
+                        val curRoutePriority =  KNRoutePriority.valueOf(KNRoutePriority.KNRoutePriority_Recommand.toString())
                         val curAvoidOptions = KNRouteAvoidOption.KNRouteAvoidOption_None.value
 
                         knTrip?.routeWithPriority(curRoutePriority, curAvoidOptions) { error, _ ->
@@ -126,12 +128,15 @@ class NavigationActivity :
                                     voiceGuideDelegate = this@NavigationActivity
                                     citsGuideDelegate = this@NavigationActivity
 
+                                    settingMap()
+                                    // 기본 주행 화면을 통해 길 안내를 시작
                                     binding.naviView.initWithGuidance(
                                         this,
                                         knTrip,
                                         curRoutePriority,
                                         curAvoidOptions
                                     )
+
                                 }
                             }
                         }
@@ -154,8 +159,7 @@ class NavigationActivity :
      */
     private fun settingMap() {
         binding.naviView.mapViewMode = MapViewCameraMode.Top // 2D 모드
-        binding.naviView.carType =
-            KNCarType.KNCarType_Bike // 자동차: KNCarType_1, 오토바이: KNCarType_Bike
+        binding.naviView.carType = KNCarType.KNCarType_Bike // 자동차: KNCarType_1, 오토바이: KNCarType_Bike
     }
 
     /**
@@ -175,23 +179,16 @@ class NavigationActivity :
 
         if (aRouteGuide.curDirection?.location?.pos != null && aRouteGuide.nextDirection?.location?.pos != null) {
             rgCode = aRouteGuide.nextDirection?.rgCode.toString()
+
             // todo : 모든 rgCode를 적용해야하나?
             when (rgCode) {
-                "KNRGCode_Straight" -> {
-                    rgCode = "직진"
-                }
+                "KNRGCode_Straight" -> { rgCode = "직진" }
 
-                "KNRGCode_LeftTurn" -> {
-                    rgCode = "좌회전"
-                }
+                "KNRGCode_LeftTurn" -> { rgCode = "좌회전" }
 
-                "KNRGCode_RightTurn" -> {
-                    rgCode = "우회전"
-                }
+                "KNRGCode_RightTurn" -> { rgCode = "우회전" }
 
-                "KNRGCode_UTurn" -> {
-                    rgCode = "유턴"
-                }
+                "KNRGCode_UTurn" -> { rgCode = "유턴" }
             }
 
             /**
