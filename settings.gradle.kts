@@ -13,7 +13,7 @@ dependencyResolutionManagement {
         maven {
             url = uri("https://devrepo.kakaomobility.com/repository/kakao-mobility-android-knsdk-public/")
         }
-        maven("https://naver.jfrog.io/artifactory/maven/")
+        maven("https://repository.map.naver.com/archive/maven")
     }
 }
 

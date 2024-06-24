@@ -69,7 +69,7 @@ dependencies {
     implementation("com.kakaomobility.knsdk:knsdk_ui:1.9.4")
 
     // Naver Map
-    implementation("com.naver.maps:map-sdk:3.17.0")
+    implementation("com.naver.maps:map-sdk:3.18.0")
 
     // 위치 정보, 등록을 하면 Navigation이랑 충돌이 나면서 크래시 발생
 //    implementation("com.google.android.gms:play-services-location:21.0.1")
